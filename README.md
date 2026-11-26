@@ -57,3 +57,12 @@ python -m pytest tests/test_api.py -vv
 - [Comprehensive Technical Report](documentation/FAKECHECK_COMPREHENSIVE_TECHNICAL_REPORT.md)
 - [Deployment Guide](documentation/deployment.md)
 - [Backend API Contract](documentation/backend-api-contract.md)
+
+## Team Members
+| Name | University ID |
+| :--- | :--- |
+| Hriday Thakur | S24CSEU2000 |
+| Keshav Kumar | S24CSEU1998 |
+| Rudransh Jiyala | S24CSEU2013 |
+| Harsh Agarwal | S24CSEU2011 |
+| Aman Kumar | S24CSEU2010 |
