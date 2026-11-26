@@ -2,6 +2,12 @@
 
 FakeCheck is a multi-pipeline AI-generated and manipulated content detection platform with a Neo-Brutalist single-file frontend (`frontend/index.html`) served by a FastAPI inference backend (`backend/app/main.py`).
 
+## Screenshots / Application Preview
+
+![Fakeddit Analysis Preview](documentation/screenshots/fakeddit-result.png)
+![SNLI-VE Consistency Preview](documentation/screenshots/snlive-result.png)
+![FaceForensics++ Video Analysis Result](documentation/screenshots/faceforensics-result.png)
+
 ## Supported Primary Models
 1. **Fakeddit (`fk_m3_clip`):** `M3_clip_best.pt` (CLIP ViT-B/16 Dual-Encoder) — binary misinformation classification (`REAL` / `FAKE`) on image + text.
 2. **SNLI-VE (`snli_blip`):** `blip-best.pt` (`Salesforce/blip-itm-base-coco`) — 3-class visual entailment (`entailment`, `neutral`, `contradiction`) on image + hypothesis. *(Visual entailment, not deepfake detection.)*
