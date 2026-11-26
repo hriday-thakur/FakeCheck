@@ -1,0 +1,39 @@
+{
+  "sample_id": "213rlt",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0304,
+  "per_model_probabilities_true": {
+    "M1_text": 0.0282,
+    "M2_image": 0.1749,
+    "M3_clip": 0.0782,
+    "M4_vilt": 0.0812
+  },
+  "clip_image_text_similarity": 0.3062,
+  "top_evidence_words": [
+    {
+      "word": "the",
+      "importance": 0.0213
+    },
+    {
+      "word": "antiamerican",
+      "importance": 0.0147
+    },
+    {
+      "word": "american",
+      "importance": 0.0133
+    },
+    {
+      "word": "modern",
+      "importance": 0.0068
+    },
+    {
+      "word": "knocks",
+      "importance": -0.0031
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/213rlt_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/213rlt_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.030, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.306, top influential words=['the', 'antiamerican', 'american']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

@@ -1,0 +1,16 @@
+FaceForensics++ requirement,Status
+"Dataset provenance, class balance and split manifests",Implemented
+Source-video grouped split using ori_vid,Implemented; disjointness asserted
+"Xception, EfficientNet-B4 and ResNet-50 baselines",Implemented
+Soft-voting model ensemble (decision-level fusion),Implemented and evaluated
+Xception + BiLSTM temporal feature fusion,Implemented and evaluated
+Frame-level and video-level metrics,Implemented
+Per-manipulation evaluation against REAL/original,Corrected and implemented
+Overfitting monitoring and regularization,Implemented; inspect generalization-gap plots
+Synthetic JPEG robustness tests,Implemented; not official C40
+Grad-CAM examples,Implemented; post-hoc only
+15 difficult cases,CSV generated; manual reviewer notes still required
+REAL / FAKE / UNCERTAIN prediction,Implemented with validation-selected selective cutoff
+Official FF++ benchmark,"Intentionally out of scope, per user request"
+F3Net and SPSL,Not included; require verified implementations/checkpoints
+Fakeddit and SNLI-VE multimodal experiments,Separate project notebooks

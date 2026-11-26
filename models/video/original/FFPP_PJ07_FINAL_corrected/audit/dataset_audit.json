@@ -1,0 +1,18 @@
+{
+  "dataset": "KoreaPeter/faceforensics-c23",
+  "split_used": "train",
+  "compression": "C23-derived hosted frame dataset only",
+  "sampling_cap_per_class": 3000,
+  "per_video_frame_cap": 12,
+  "retained_class_counts": {
+    "0": 3000,
+    "1": 3000
+  },
+  "unreadable_images": 0,
+  "source_group_split": "GroupShuffleSplit on ori_vid; disjointness asserted",
+  "limitations": [
+    "No original video decoding in this notebook; hosted frame images are used.",
+    "No separate official RAW/C40 evaluation.",
+    "Custom grouped split from hosted train frames, not official FF++ test protocol."
+  ]
+}

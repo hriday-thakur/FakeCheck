@@ -1,0 +1,5 @@
+case,test_index,true_label,predicted_label,saved_image,interpretation_note
+correct_REAL,88,REAL,REAL,/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected/explainability/gradcam_correct_REAL.png,Review whether the highlighted region corresponds to relevant facial/manipulation evidence.
+correct_FAKE,862,FAKE,FAKE,/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected/explainability/gradcam_correct_FAKE.png,Review whether the highlighted region corresponds to relevant facial/manipulation evidence.
+false_positive,229,REAL,FAKE,/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected/explainability/gradcam_false_positive.png,Review whether the highlighted region corresponds to relevant facial/manipulation evidence.
+false_negative,160,FAKE,REAL,/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected/explainability/gradcam_false_negative.png,Review whether the highlighted region corresponds to relevant facial/manipulation evidence.

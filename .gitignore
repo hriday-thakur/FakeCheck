@@ -1,0 +1,21 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Environment & Secrets
+.env
+*.log
+
+# Model Checkpoints, Weights & Large Binary Artifacts (>50 MB)
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+models/**/photos/

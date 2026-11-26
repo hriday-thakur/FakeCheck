@@ -1,0 +1,71 @@
+{
+  "dataset": "KoreaPeter/faceforensics-c23",
+  "dataset_split": "train",
+  "compression": "Hosted C23-derived frames",
+  "split_method": "Custom GroupShuffleSplit grouped by ori_vid",
+  "split_sizes": {
+    "train": 4191,
+    "validation": 887,
+    "test": 922
+  },
+  "source_groups_disjoint": true,
+  "frame_models": [
+    "Xception",
+    "EfficientNet_B4",
+    "ResNet50"
+  ],
+  "frame_soft_voting_ensemble_test_metrics": {
+    "accuracy": 0.8709327548806941,
+    "precision_macro": 0.8709350310798666,
+    "recall_macro": 0.8709297948428383,
+    "f1_macro": 0.8709313884069052,
+    "f1_weighted": 0.8709322993894312,
+    "balanced_accuracy": 0.8709297948428383,
+    "roc_auc": 0.9464426877470355,
+    "pr_auc": 0.9493424218624724,
+    "mcc": 0.7418648259042256
+  },
+  "frame_ensemble_threshold_selected_on_validation": 0.56,
+  "temporal_model": "Xception frame embeddings + BiLSTM with packed true sequence lengths",
+  "video_level_test_metrics": {
+    "accuracy": 0.916267942583732,
+    "precision_macro": 0.910012921837906,
+    "recall_macro": 0.8815436241610739,
+    "f1_macro": 0.894171856802876,
+    "f1_weighted": 0.914764020514878,
+    "balanced_accuracy": 0.8815436241610739,
+    "roc_auc": 0.9619127516778523,
+    "pr_auc": 0.974211185092817,
+    "mcc": 0.7910444137996444
+  },
+  "video_level_threshold_selected_on_validation": 0.25,
+  "video_mean_pooling_test_metrics": {
+    "accuracy": 0.8708133971291866,
+    "precision_macro": 0.8372784045124899,
+    "recall_macro": 0.8745525727069351,
+    "f1_macro": 0.8511278195488722,
+    "f1_weighted": 0.8741806669784509,
+    "balanced_accuracy": 0.8745525727069351,
+    "roc_auc": 0.9352628635346756,
+    "pr_auc": 0.97030822804604,
+    "mcc": 0.7108543989556327
+  },
+  "jpeg_stress": "Synthetic JPEG recompression only; not official C40 or RAW",
+  "gradcam": "Post-hoc visualization; no weight updates and no effect on test predictions",
+  "selective_prediction_cutoff": 0.0,
+  "selective_prediction_validation_report": {
+    "validation_coverage": 1.0,
+    "validation_accepted_accuracy": 0.8861330326944757,
+    "accepted_samples": 887,
+    "target_accuracy": 0.85
+  },
+  "manual_error_review_csv": "/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected/error_audit/15_difficult_cases_for_manual_review.csv",
+  "limitations": [
+    "Custom grouped split from hosted train frames; not official FF++ test-video benchmark.",
+    "Only hosted C23-derived frames used; no official RAW/C40 comparison.",
+    "No raw-video decoding or face detection; hosted frames/metadata are used.",
+    "F3Net and SPSL are not included; no unverified approximations are claimed.",
+    "Per-manipulation results compare each fake manipulation category against REAL/original frames.",
+    "Human review of the 15-case audit is still required."
+  ]
+}

@@ -1,0 +1,3994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FAKE/CHECK — Multimodal Deepfake Detection &amp; Explainable AI Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   DESIGN TOKENS & THEME SYSTEM (NEO-BRUTALIST LIGHT / DARK)
+   ========================================================================== */
+:root {
+  --bg: #f1ede4;
+  --ink: #0d0d0d;
+  --card: #fffdf7;
+  --acid: #d8ff00;
+  --red: #ff2b2b;
+  --cyan: #00e5ff;
+  --green: #7dff7d;
+  --muted: #5a574f;
+  --border-w: 4px;
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --shadow-md: 8px 8px 0 var(--ink);
+  --shadow-lg: 12px 12px 0 var(--ink);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0d0d;
+    --ink: #f1ede4;
+    --card: #171717;
+    --muted: #a6a298;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --ink: #f1ede4;
+  --card: #171717;
+  --muted: #a6a298;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f1ede4;
+  --ink: #0d0d0d;
+  --card: #fffdf7;
+  --muted: #5a574f;
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   RESET & BASE TYPOGRAPHY
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Global subtle CRT scanline overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+  opacity: 0.055;
+  background: repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 3px);
+}
+
+.disp {
+  font-family: "Archivo Black", Impact, "Arial Black", sans-serif;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.025em;
+}
+
+.mono {
+  font-family: "Space Mono", ui-monospace, monospace;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ==========================================================================
+   OPENING NEWSPAPER LANDING CURTAIN (#intro)
+   ========================================================================== */
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0d0d0d;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  transition: transform 0.88s cubic-bezier(0.7, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+#intro.gone {
+  transform: translateY(-108%);
+  pointer-events: none;
+}
+
+.introbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.paperwrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.paper {
+  width: min(560px, 92vw);
+  background: #f1ede4;
+  color: #111;
+  border: 4px solid #111;
+  padding: 18px 20px 24px;
+  box-shadow: 12px 12px 0 var(--red);
+  font-family: "Playfair Display", Georgia, serif;
+  animation: paperSpin 1.5s cubic-bezier(0.2, 0.85, 0.2, 1) both;
+  position: relative;
+}
+
+@keyframes paperSpin {
+  0% { transform: scale(0.05) rotate(880deg); opacity: 0; }
+  65% { opacity: 1; }
+  100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+}
+
+.mast {
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(26px, 7vw, 44px);
+  border-bottom: 5px double #111;
+  padding-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.paper-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font: 700 10px "Space Mono", monospace;
+  border-bottom: 2px solid #111;
+  padding: 5px 0;
+  text-transform: uppercase;
+}
+
+.paper h2 {
+  font-weight: 900;
+  font-size: clamp(32px, 9vw, 60px);
+  line-height: 0.92;
+  margin: 14px 0 10px;
+  text-transform: uppercase;
+}
+
+.paper h2 em {
+  background: var(--red);
+  color: #fff;
+  font-style: normal;
+  padding: 0 8px;
+  display: inline-block;
+  animation: paperBlink 1.1s steps(2) infinite;
+}
+
+@keyframes paperBlink {
+  50% { background: #111; color: var(--acid); }
+}
+
+.paper-cols {
+  columns: 2;
+  column-gap: 16px;
+  column-rule: 1px solid #111;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: justify;
+}
+
+.paper-cols p + p {
+  margin-top: 8px;
+}
+
+.stamp {
+  position: absolute;
+  right: 5%;
+  bottom: 8%;
+  border: 5px solid var(--red);
+  color: var(--red);
+  background: rgba(241, 237, 228, 0.85);
+  font: 900 clamp(22px, 5vw, 30px) "Archivo Black", sans-serif;
+  padding: 4px 12px;
+  transform: rotate(-14deg);
+  opacity: 0;
+  animation: stampSlam 0.32s 1.65s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+  letter-spacing: 0.04em;
+}
+
+@keyframes stampSlam {
+  0% { transform: rotate(-14deg) scale(3.4); opacity: 0; }
+  80% { transform: rotate(-14deg) scale(0.92); opacity: 1; }
+  100% { transform: rotate(-14deg) scale(1); opacity: 1; }
+}
+
+.intro-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeInUp 0.4s 1.95s forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#enterBtn {
+  font: 700 15px "Space Mono", monospace;
+  background: var(--acid);
+  color: #000;
+  border: 4px solid #fff;
+  padding: 14px 26px;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0 var(--red);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+#enterBtn:hover {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 var(--red);
+}
+
+#skipIntroBtn {
+  background: transparent;
+  border: none;
+  color: #9e9b93;
+  font: 700 11px "Space Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+
+#skipIntroBtn:hover {
+  color: var(--acid);
+}
+
+/* ==========================================================================
+   STICKY TOP NAVIGATION BAR
+   ========================================================================== */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: var(--bg);
+  border-bottom: 4px solid var(--ink);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  font-family: "Archivo Black", sans-serif;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+}
+
+.brand .slash {
+  color: var(--red);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 3px solid transparent;
+  color: var(--ink);
+  font: 700 12px "Space Mono", monospace;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+}
+
+.nav-btn:hover {
+  background: var(--acid);
+  color: #000;
+  border-color: var(--ink);
+}
+
+.nav-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.api-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--acid);
+  color: #000;
+  border: 3px solid var(--ink);
+  font: 700 11px "Space Mono", monospace;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.api-pill:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.api-dot {
+  width: 8px;
+  height: 8px;
+  background: #000;
+  border-radius: 50%;
+  animation: pulseDot 1.6s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.75); }
+}
+
+.theme-btn, .menu-btn {
+  background: var(--card);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  font: 700 12px "Space Mono", monospace;
+  padding: 5px 10px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  text-transform: uppercase;
+}
+
+.theme-btn:hover, .menu-btn:hover {
+  background: var(--ink);
+  color: var(--acid);
+}
+
+.menu-btn {
+  display: none;
+}
+
+.mobile-drawer {
+  display: none;
+  background: var(--card);
+  border-bottom: 4px solid var(--ink);
+  padding: 12px 16px;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  top: 58px;
+  z-index: 490;
+}
+
+.mobile-drawer.open {
+  display: flex;
+}
+
+.mobile-drawer .nav-btn {
+  text-align: left;
+  border: 3px solid var(--ink);
+  padding: 10px 12px;
+}
+
+@media (max-width: 960px) {
+  .nav-links { display: none; }
+  .menu-btn { display: inline-block; }
+  .api-pill span.api-text-long { display: none; }
+}
+
+/* ==========================================================================
+   COMMON BRUTALIST COMPONENTS
+   ========================================================================== */
+.view {
+  display: none;
+  flex: 1;
+}
+
+.view.active {
+  display: block;
+  animation: viewIn 0.42s cubic-bezier(0.2, 0.85, 0.2, 1) both;
+}
+
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(24px, 4.5vw, 56px) 16px;
+}
+
+.section-band {
+  border-bottom: 4px solid var(--ink);
+}
+
+.tag {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+}
+
+.tag.acid { background: var(--acid); color: #000; border: 2px solid var(--ink); }
+.tag.red { background: var(--red); color: #fff; }
+.tag.green { background: var(--green); color: #000; border: 2px solid var(--ink); }
+.tag.cyan { background: var(--cyan); color: #000; border: 2px solid var(--ink); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 700 14px "Space Mono", monospace;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #000;
+  background: var(--acid);
+  border: 4px solid var(--ink);
+  padding: 12px 22px;
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.alt {
+  background: var(--card);
+  color: var(--ink);
+}
+
+.btn.danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn.sm {
+  padding: 7px 13px;
+  font-size: 12px;
+  border-width: 3px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.card {
+  background: var(--card);
+  border: 4px solid var(--ink);
+  padding: 20px;
+  box-shadow: 8px 8px 0 var(--ink);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card.hoverable:hover {
+  transform: translate(-3px, -3px) rotate(-0.6deg);
+  box-shadow: 12px 12px 0 var(--red);
+}
+
+.banner-static {
+  background: var(--acid);
+  color: #000;
+  border: 4px solid var(--ink);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+/* Scroll reveal */
+.rv {
+  opacity: 0;
+  transform: translateY(40px) rotate(0.8deg);
+  transition: opacity 0.65s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.rv.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ==========================================================================
+   HOME VIEW: HERO, GLITCH, SCANNER, MARQUEES, PIPELINE STRIP, TEAM
+   ========================================================================== */
+.hero {
+  position: relative;
+  border-bottom: 4px solid var(--ink);
+  overflow: hidden;
+}
+
+.hero-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(28px, 6vw, 68px) 16px clamp(32px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+
+.hero h1 {
+  font-size: clamp(50px, 11.5vw, 158px);
+  position: relative;
+}
+
+.hero h1 span {
+  display: block;
+}
+
+.glitch {
+  position: relative;
+  color: var(--red);
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-t);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.glitch::before {
+  color: var(--cyan);
+  transform: translate(-4px, 0);
+  clip-path: inset(0 0 55% 0);
+  animation: glitch1 2.2s infinite steps(1);
+}
+
+.glitch::after {
+  color: var(--acid);
+  mix-blend-mode: difference;
+  transform: translate(4px, 0);
+  clip-path: inset(55% 0 0 0);
+  animation: glitch2 1.8s infinite steps(1);
+}
+
+@keyframes glitch1 {
+  0%, 88% { transform: translate(0); }
+  90% { transform: translate(-8px, 2px); }
+  94% { transform: translate(6px, -2px); }
+  97% { transform: translate(-4px, 1px); }
+}
+
+@keyframes glitch2 {
+  0%, 82% { transform: translate(0); }
+  85% { transform: translate(8px, -2px); }
+  91% { transform: translate(-6px, 3px); }
+  96% { transform: translate(3px, -1px); }
+}
+
+.hero-intro {
+  max-width: 580px;
+  margin: 24px 0 28px;
+  font-size: clamp(14px, 1.8vw, 18px);
+  border-left: 8px solid var(--acid);
+  padding-left: 16px;
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* Floating Brutalist Scanner Card */
+.scan-card {
+  width: min(275px, 78vw);
+  border: 4px solid var(--ink);
+  background: var(--card);
+  box-shadow: 10px 10px 0 var(--red);
+  transform: rotate(3.5deg);
+  animation: floatScan 5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes floatScan {
+  0%, 100% { transform: rotate(3.5deg) translateY(0); }
+  50% { transform: rotate(-2deg) translateY(-14px); }
+}
+
+.scan-viewport {
+  aspect-ratio: 1;
+  background: #111;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.scan-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(216, 255, 0, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216, 255, 0, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.scan-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--acid);
+  box-shadow: 0 0 18px var(--acid), 0 0 6px #fff;
+  animation: laserSweep 2.1s linear infinite;
+}
+
+@keyframes laserSweep {
+  from { top: -8px; }
+  to { top: 102%; }
+}
+
+.scan-hud {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  font: 700 10px "Space Mono", monospace;
+  color: var(--acid);
+}
+
+.scan-foot {
+  padding: 9px 10px;
+  font: 700 12px "Space Mono", monospace;
+  display: flex;
+  justify-content: space-between;
+  background: var(--red);
+  color: #fff;
+  border-top: 4px solid var(--ink);
+}
+
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+  }
+  .scan-card {
+    margin: 12px auto 0;
+  }
+}
+
+/* Dual Marquees */
+.marq {
+  background: var(--acid);
+  color: #000;
+  border-bottom: 4px solid var(--ink);
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: clamp(20px, 3.6vw, 36px);
+}
+
+.marq .track {
+  display: inline-block;
+  padding: 9px 0;
+  animation: marqScroll 26s linear infinite;
+}
+
+.marq.rev {
+  background: var(--red);
+  color: #fff;
+}
+
+.marq.rev .track {
+  animation-direction: reverse;
+  animation-duration: 24s;
+}
+
+@keyframes marqScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Home Grid & Pipeline Strip */
+h2.sec-title {
+  font-size: clamp(34px, 7vw, 84px);
+  margin-bottom: 26px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 24px;
+}
+
+.task-num {
+  font: 400 58px "Archivo Black", sans-serif;
+  color: var(--red);
+  line-height: 1;
+}
+
+.task-card h3 {
+  font: 400 22px "Archivo Black", sans-serif;
+  text-transform: uppercase;
+  margin: 8px 0 10px;
+}
+
+.pipe-strip {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pipe-step {
+  flex: 1 1 170px;
+  border: 4px solid var(--ink);
+  margin: -2px;
+  padding: 18px 16px;
+  background: var(--card);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+  transition: transform 0.18s, background 0.18s, color 0.18s;
+}
+
+.pipe-step:hover {
+  background: var(--acid);
+  color: #000;
+  transform: scale(1.05) rotate(-1deg);
+  z-index: 3;
+}
+
+.pipe-step b {
+  display: block;
+  font: 400 32px "Archivo Black", sans-serif;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+.pipe-step:hover b {
+  color: #000;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.team-card {
+  border: 4px solid var(--ink);
+  padding: 14px;
+  background: var(--card);
+  font-weight: 700;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: transform 0.15s, background 0.15s, color 0.15s;
+}
+
+.team-card:hover {
+  background: var(--ink);
+  color: var(--acid);
+  transform: rotate(1.5deg) translateY(-3px);
+}
+
+.team-card span {
+  display: block;
+  font-size: 11px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   ANALYZE MEDIA WORKBENCH
+   ========================================================================== */
+.pipe-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 760px) {
+  .pipe-tabs { grid-template-columns: 1fr; }
+}
+
+.pipe-tab {
+  text-align: left;
+  background: var(--card);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  padding: 16px;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: transform 0.12s, background 0.12s, box-shadow 0.12s;
+}
+
+.pipe-tab:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.pipe-tab.active {
+  background: var(--acid);
+  color: #000;
+  box-shadow: 8px 8px 0 var(--red);
+}
+
+.pipe-tab .pt-code {
+  font: 400 13px "Archivo Black", sans-serif;
+  color: var(--red);
+  display: block;
+}
+
+.pipe-tab.active .pt-code {
+  color: #000;
+}
+
+.pipe-tab .pt-name {
+  font: 400 20px "Archivo Black", sans-serif;
+  text-transform: uppercase;
+  display: block;
+  margin: 4px 0;
+}
+
+.pipe-tab .pt-sub {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.dropzone {
+  border: 4px dashed var(--ink);
+  background: var(--card);
+  min-height: 290px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.dropzone.dragover {
+  background: var(--acid);
+  color: #000;
+  transform: scale(1.015) rotate(-0.5deg);
+}
+
+.dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.dropzone .dz-big {
+  font: 400 42px/0.92 "Archivo Black", sans-serif;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.dropzone img, .dropzone video, .dropzone canvas {
+  max-width: 100%;
+  max-height: 310px;
+  border: 4px solid var(--ink);
+  background: #000;
+}
+
+.file-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--ink);
+  color: var(--acid);
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+label.field-lbl {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+  margin: 16px 0 6px;
+}
+
+label.field-lbl:first-child {
+  margin-top: 0;
+}
+
+textarea, select, input[type="text"], input[type="number"], input[type="url"] {
+  width: 100%;
+  font: 400 13px "Space Mono", monospace;
+  background: var(--card);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  padding: 10px 12px;
+  border-radius: 0;
+}
+
+textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+textarea:disabled, input:disabled, select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: repeating-linear-gradient(45deg, var(--bg), var(--bg) 8px, var(--card) 8px, var(--card) 16px);
+}
+
+.mode-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mode-pill {
+  border: 3px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  font: 700 12px "Space Mono", monospace;
+  text-transform: uppercase;
+  padding: 8px 13px;
+  cursor: pointer;
+}
+
+.mode-pill.active {
+  background: var(--ink);
+  color: var(--acid);
+}
+
+.mode-pill:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.arch-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 3px solid var(--ink);
+  background: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.arch-badges span {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  padding: 3px 8px;
+}
+
+.adv-drawer {
+  margin-top: 18px;
+  border: 4px solid var(--ink);
+  background: var(--bg);
+}
+
+.adv-toggle {
+  width: 100%;
+  text-align: left;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 10px 14px;
+  font: 700 12px "Space Mono", monospace;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.adv-body {
+  padding: 14px;
+  display: none;
+}
+
+.adv-body.open {
+  display: block;
+}
+
+.adv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.chk-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chk-line input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red);
+}
+
+.err-box {
+  margin-top: 12px;
+  background: var(--red);
+  color: #fff;
+  border: 3px solid var(--ink);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  display: none;
+}
+
+.err-box.show {
+  display: block;
+}
+
+.terminal-steps {
+  display: none;
+  margin-top: 16px;
+  border: 4px solid var(--ink);
+  background: #0d0d0d;
+  color: var(--acid);
+  padding: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 6px 6px 0 var(--red);
+}
+
+.terminal-steps.show {
+  display: block;
+}
+
+.terminal-steps div {
+  opacity: 0.25;
+  padding: 3px 0;
+  transition: opacity 0.2s;
+}
+
+.terminal-steps div.done {
+  opacity: 1;
+}
+
+.legend-box {
+  margin-top: 14px;
+  border: 3px solid var(--ink);
+  background: var(--bg);
+  padding: 12px;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   UNIFIED PREDICTION RESULTS & XAI VIEW
+   ========================================================================== */
+.verdict-banner {
+  border: 4px solid var(--ink);
+  padding: clamp(18px, 3.5vw, 30px);
+  box-shadow: 10px 10px 0 var(--ink);
+  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.verdict-banner.v-REAL { background: var(--green); color: #000; }
+.verdict-banner.v-FAKE { background: var(--red); color: #fff; }
+.verdict-banner.v-UNCERTAIN { background: var(--acid); color: #000; }
+
+.verdict-word {
+  font-size: clamp(46px, 10vw, 118px);
+  animation: stampIn 0.38s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes stampIn {
+  from { transform: scale(1.6) rotate(-4deg); opacity: 0; }
+  to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.verdict-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.meta-tile {
+  border: 3px solid var(--ink);
+  background: var(--card);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.meta-tile small {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.meta-tile b {
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.prob-row {
+  margin-bottom: 14px;
+}
+
+.prob-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.prob-bar {
+  height: 24px;
+  border: 3px solid var(--ink);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.prob-fill {
+  height: 100%;
+  width: 0;
+  transition: width 1s cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+.prob-fill.p-real { background: var(--green); }
+.prob-fill.p-fake { background: var(--red); }
+.prob-fill.p-unc { background: var(--acid); }
+.prob-fill.p-cyan { background: var(--cyan); }
+
+/* XAI Tabs & Visualizations */
+.xai-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.xai-tab {
+  border: 3px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  font: 700 12px "Space Mono", monospace;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+.xai-tab.active {
+  background: var(--ink);
+  color: var(--acid);
+}
+
+.xai-panel {
+  display: none;
+}
+
+.xai-panel.active {
+  display: block;
+}
+
+.tok-highlight {
+  font-size: 15px;
+  line-height: 2;
+  padding: 14px;
+  border: 3px solid var(--ink);
+  background: var(--bg);
+  margin-bottom: 16px;
+}
+
+.tok-pos {
+  background: var(--red);
+  color: #fff;
+  padding: 2px 5px;
+  margin: 0 2px;
+  border: 2px solid var(--ink);
+  font-weight: 700;
+}
+
+.tok-neg {
+  background: var(--green);
+  color: #000;
+  padding: 2px 5px;
+  margin: 0 2px;
+  border: 2px solid var(--ink);
+  font-weight: 700;
+}
+
+.img-xai-stage {
+  position: relative;
+  border: 4px solid var(--ink);
+  background: #111;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+}
+
+.img-xai-stage img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.heatmap-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 0.15s;
+}
+
+.frame-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.frame-card {
+  border: 3px solid var(--ink);
+  background: var(--bg);
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.frame-card:hover, .frame-card.selected {
+  background: var(--acid);
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.frame-thumb {
+  aspect-ratio: 16/10;
+  background: #141414;
+  border: 2px solid var(--ink);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--acid);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 3px solid var(--ink);
+  font-size: 12px;
+}
+
+.matrix-table th, .matrix-table td {
+  border: 2px solid var(--ink);
+  padding: 8px;
+  text-align: center;
+}
+
+.matrix-table th {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ==========================================================================
+   TABLES (LEADERBOARD & HISTORY)
+   ========================================================================== */
+.table-wrap {
+  overflow-x: auto;
+  border: 4px solid var(--ink);
+  background: var(--card);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+table.brut {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+table.brut th, table.brut td {
+  border-bottom: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  padding: 11px 12px;
+  text-align: left;
+}
+
+table.brut th {
+  background: var(--ink);
+  color: var(--bg);
+  text-transform: uppercase;
+  font-size: 11px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+table.brut th.sortable {
+  cursor: pointer;
+}
+
+table.brut th.sortable:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+table.brut tbody tr:hover td {
+  background: var(--acid);
+  color: #000;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 2px solid var(--ink);
+}
+
+.pill-REAL { background: var(--green); color: #000; }
+.pill-FAKE { background: var(--red); color: #fff; }
+.pill-UNCERTAIN { background: var(--acid); color: #000; }
+.pill-WAIT { background: var(--bg); color: var(--ink); }
+
+/* Strict Model Leaderboard Status Badges */
+.pill-Trained { background: var(--card); color: var(--ink); border: 2px solid var(--ink); box-shadow: inset 0 0 0 2px var(--acid); }
+.pill-Evaluated { background: var(--green); color: #000; border: 2px solid var(--ink); }
+.pill-Planned { background: var(--bg); color: var(--muted); border: 2px dashed var(--ink); }
+.pill-Unavailable { background: var(--card); color: var(--red); border: 2px solid var(--red); }
+
+/* Category / Role Distinction Badges */
+.role-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 2px solid var(--ink);
+  white-space: nowrap;
+}
+.role-text { background: var(--bg); color: var(--ink); }
+.role-vis { background: var(--cyan); color: #000; }
+.role-fusion { background: var(--acid); color: #000; }
+.role-frame { background: var(--bg); color: var(--ink); }
+.role-temp { background: var(--cyan); color: #000; }
+.role-ens { background: var(--acid); color: #000; }
+.role-ext { background: var(--ink); color: var(--bg); }
+
+.lb-meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  background: var(--card);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.lb-meta-bar span {
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  padding: 3px 8px;
+}
+.lb-callout {
+  margin-top: 18px;
+  border: 4px solid var(--ink);
+  background: var(--card);
+  padding: 16px 18px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.lb-footnote {
+  margin-top: 14px;
+  border: 3px dashed var(--ink);
+  background: var(--bg);
+  padding: 10px 14px;
+  font-size: 12px;
+}
+
+/* ==========================================================================
+   DASHBOARD STATS & EMPTY STATE
+   ========================================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.stat-card {
+  border: 4px solid var(--ink);
+  background: var(--card);
+  padding: 16px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.stat-card .stat-val {
+  font: 400 44px/1 "Archivo Black", sans-serif;
+  margin: 6px 0;
+}
+
+.stat-card.s-real { background: var(--green); color: #000; }
+.stat-card.s-fake { background: var(--red); color: #fff; }
+.stat-card.s-unc { background: var(--acid); color: #000; }
+
+.empty-state {
+  border: 4px dashed var(--ink);
+  background: var(--card);
+  padding: clamp(28px, 6vw, 56px) 20px;
+  text-align: center;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+/* ==========================================================================
+   MODAL & TOAST
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(13, 13, 13, 0.82);
+  display: none;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal-backdrop.open {
+  display: grid;
+}
+
+.modal-box {
+  width: min(680px, 96vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--card);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  box-shadow: 12px 12px 0 var(--acid);
+  padding: 22px;
+}
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 980;
+  background: var(--ink);
+  color: var(--acid);
+  border: 4px solid var(--acid);
+  padding: 12px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0 var(--red);
+  transform: translateY(130%);
+  transition: transform 0.25s cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+.toast.show {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+footer {
+  margin-top: auto;
+  padding: 24px 16px;
+  background: var(--ink);
+  color: var(--bg);
+  border-top: 4px solid var(--ink);
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   REDUCED MOTION & PRINT STYLESHEET
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .rv { opacity: 1; transform: none; }
+}
+
+@media print {
+  #intro, .topbar, .mobile-drawer, .no-print, footer, body::after, .toast, .modal-backdrop {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .card, .verdict-banner, .table-wrap {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
+/* Module pages are chosen from the nav; the in-page pipeline tabs are no longer shown */
+.pipe-tabs { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ========================================================================
+     OPENING NEWSPAPER LANDING CURTAIN
+     ======================================================================== -->
+<div id="intro" role="dialog" aria-modal="true" aria-label="The Daily Verdict Intro">
+  <div class="introbox">
+    <div class="paperwrap">
+      <div class="paper">
+        <div class="mast">The Daily Verdict</div>
+        <div class="paper-meta">
+          <span>Vol. 07 &middot; PID-07</span>
+          <span>Extra Edition</span>
+          <span>Free</span>
+        </div>
+        <h2>Seeing is no longer <em>believing</em></h2>
+        <div class="paper-cols">
+          <p>Faces are being swapped in real time. Headlines are fabricated to hijack genuine photographs. A single viral post can carry a manipulated face and a false claim simultaneously.</p>
+          <p>B.Tech CSE researchers at CSET 346 respond with three independent multimodal pipelines—Fakeddit, FaceForensics++, and SNLI-VE—delivering calibrated verdicts and transparent XAI proof.</p>
+        </div>
+        <div class="stamp">FAKE?</div>
+      </div>
+    </div>
+    <div class="intro-actions">
+      <button id="enterBtn" type="button">Read the evidence &rarr;</button>
+      <button id="skipIntroBtn" type="button">Skip intro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     STICKY TOP NAVIGATION BAR
+     ======================================================================== -->
+<header class="topbar">
+  <button class="brand" id="brandHome" type="button" aria-label="FAKE/CHECK Home">
+    FAKE<span class="slash">/</span>CHECK
+  </button>
+
+  <nav class="nav-links" aria-label="Primary Navigation">
+    <button class="nav-btn active" data-view="home" type="button">Overview</button>
+    <button class="nav-btn" data-view="video" type="button">Video Detection</button>
+    <button class="nav-btn" data-view="fakenews" type="button">Fake News Detection</button>
+    <button class="nav-btn" data-view="verify" type="button">Image-Text Verification</button>
+    <button class="nav-btn" data-view="unified" type="button">Unified Analysis</button>
+    <button class="nav-btn" data-view="analytics" type="button">Analytics</button>
+  </nav>
+
+  <div class="nav-right">
+    <button class="api-pill" id="openApiModal" type="button" title="Inspect REST API Contract">
+      <span class="api-dot"></span>
+      <span>BACKEND</span><span class="api-text-long">&nbsp;&middot; CONFIGURE API</span>
+    </button>
+    <button class="theme-btn" id="themeToggle" type="button" aria-label="Toggle dark and light theme">DARK</button>
+    <button class="menu-btn" id="mobileMenuBtn" type="button" aria-label="Toggle Menu">MENU</button>
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation">
+  <button class="nav-btn active" data-view="home" type="button">Overview</button>
+  <button class="nav-btn" data-view="video" type="button">Video Detection</button>
+  <button class="nav-btn" data-view="fakenews" type="button">Fake News Detection</button>
+  <button class="nav-btn" data-view="verify" type="button">Image-Text Verification</button>
+  <button class="nav-btn" data-view="unified" type="button">Unified Analysis</button>
+  <button class="nav-btn" data-view="analytics" type="button">Analytics</button>
+</div>
+
+<!-- ========================================================================
+     VIEW 1: HOME (HERO, MARQUEES, 3 PIPELINES, WORKFLOW, TEAM)
+     ======================================================================== -->
+<main id="view-home" class="view active">
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <span class="tag">Multimodal NLP &middot; Explainable Verification</span>
+        <h1 class="disp">
+          <span>Spot the</span>
+          <span class="glitch" data-t="deepfake.">deepfake.</span>
+        </h1>
+        <p class="hero-intro">
+          Drop in an image, video, or claim. Three independent pipelines check the text, face, and caption match—then prove why.
+        </p>
+        <div class="hero-ctas">
+          <button class="btn" type="button" data-go="analyze">Analyze Media &rarr;</button>
+          <a class="btn alt" href="#home-pipelines">Explore Pipelines</a>
+        </div>
+      </div>
+
+      <!-- Floating Brutalist Scanner Card -->
+      <div class="scan-card" aria-hidden="true">
+        <div class="scan-viewport">
+          <div class="scan-grid"></div>
+          <div class="scan-hud">
+            <span id="scanModeHud">XAI::ACTIVE</span>
+            <span>T=1.24</span>
+          </div>
+          <!-- Crisp inline SVG morphing face graphic -->
+          <svg id="scanSvg" width="136" height="136" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="112" height="112" stroke="#d8ff00" stroke-width="3" stroke-dasharray="10 6"/>
+            <circle cx="70" cy="64" r="34" fill="#f1ede4" stroke="#0d0d0d" stroke-width="4"/>
+            <circle id="scanEyeL" cx="57" cy="57" r="5" fill="#0d0d0d"/>
+            <circle id="scanEyeR" cx="83" cy="57" r="5" fill="#0d0d0d"/>
+            <path id="scanMouth" d="M55 78 Q70 88 85 78" stroke="#0d0d0d" stroke-width="4" stroke-linecap="square"/>
+            <path d="M22 30 H34 M22 30 V42 M118 30 H106 M118 30 V42 M22 110 H34 M22 110 V98 M118 110 H106 M118 110 V98" stroke="#ff2b2b" stroke-width="4"/>
+          </svg>
+          <div class="scan-laser"></div>
+        </div>
+        <div class="scan-foot">
+          <span id="scanStatusTxt">SCANNING...</span>
+          <span id="scanPct">00%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dual Opposite-Direction Kinetic Marquees -->
+  <div class="marq" aria-hidden="true">
+    <div class="track disp">
+      &#9733; FAKEDDIT &#9733; FACEFORENSICS++ &#9733; SNLI-VE &#9733; EXPLAINABLE AI &#9733; CALIBRATED UNCERTAINTY &#9733; FAKEDDIT &#9733; FACEFORENSICS++ &#9733; SNLI-VE &#9733; EXPLAINABLE AI &#9733; CALIBRATED UNCERTAINTY&nbsp;
+    </div>
+  </div>
+  <div class="marq rev" aria-hidden="true">
+    <div class="track disp">
+      &#10005; NOT ONE GENERIC CLASSIFIER &#10005; A FAKE FACE &ne; A FALSE CLAIM &#10005; INDEPENDENT PIPELINES &#10005; NOT ONE GENERIC CLASSIFIER &#10005; A FAKE FACE &ne; A FALSE CLAIM &#10005; INDEPENDENT PIPELINES&nbsp;
+    </div>
+  </div>
+
+  <!-- Three Independent Pipelines -->
+  <section id="home-pipelines" class="section-band">
+    <div class="wrap">
+      <span class="tag acid">Three Independent ML Pipelines</span>
+      <h2 class="disp sec-title rv">Three tasks.<br>Three kinds of proof.</h2>
+      <div class="grid-3">
+        <article class="card hoverable task-card rv">
+          <div class="task-num">T1</div>
+          <h3>Fakeddit Misinformation</h3>
+          <p>Image + Text misinformation detection using independent text encoders, visual encoders, and cross-modal fusion.</p>
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span class="tag" style="margin:0;">JPG/PNG + TEXT</span>
+            <button class="btn sm" type="button" data-launch-pipe="fakeddit">Launch T1 &rarr;</button>
+          </div>
+        </article>
+
+        <article class="card hoverable task-card rv">
+          <div class="task-num">T2</div>
+          <h3>FaceForensics++ Video</h3>
+          <p>Frame-level and temporal facial manipulation forensics covering Original, Deepfakes, Face2Face, FaceSwap, and NeuralTextures.</p>
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span class="tag" style="margin:0;">MP4 VIDEO</span>
+            <button class="btn sm" type="button" data-launch-pipe="faceforensics">Launch T2 &rarr;</button>
+          </div>
+        </article>
+
+        <article class="card hoverable task-card rv">
+          <div class="task-num">T3</div>
+          <h3>SNLI-VE + Custom Mismatch</h3>
+          <p>Visual entailment &amp; cross-modal semantic consistency verification separating Entailment, Neutral, Contradiction, and custom mismatch classes.</p>
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span class="tag" style="margin:0;">IMAGE + HYPOTHESIS</span>
+            <button class="btn sm" type="button" data-launch-pipe="snlive">Launch T3 &rarr;</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5-Step Pipeline Architecture -->
+  <section class="section-band">
+    <div class="wrap">
+      <span class="tag">End-to-End Verification Flow</span>
+      <h2 class="disp sec-title rv">Upload &rarr;<br>Calibrated Verdict.</h2>
+      <div class="pipe-strip rv">
+        <div class="pipe-step"><b>01</b>Upload Media &amp; Select Pipeline</div>
+        <div class="pipe-step"><b>02</b>Modality Encoders (Text / Vision)</div>
+        <div class="pipe-step"><b>03</b>Architecture Fusion Layer</div>
+        <div class="pipe-step"><b>04</b>Calibration &amp; Shannon Entropy</div>
+        <div class="pipe-step"><b>05</b>Verdict + XAI Evidence</div>
+      </div>
+      <p style="margin-top:20px;max-width:740px;font-size:14px;">
+        Temperature scaling is applied server-side using validation-calibrated parameters. When maximum class probability drops below threshold or normalized Shannon entropy spikes, the system abstains and routes the verdict to <strong>UNCERTAIN</strong>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Research Team -->
+  <section class="section-band">
+    <div class="wrap">
+      <span class="tag">B.Tech CSE NLP Research Project &middot; CSET 346</span>
+      <h2 class="disp sec-title rv">The Team.</h2>
+      <div class="team-grid rv">
+        <div class="team-card">Keshav Kumar<span>S24CSEU1998</span></div>
+        <div class="team-card">Hriday Thakur<span>S24CSEU2000</span></div>
+        <div class="team-card">Rudransh Jiyala<span>S24CSEU2013</span></div>
+        <div class="team-card">Harsh Agarwal<span>S24CSEU2011</span></div>
+        <div class="team-card">Aman Kumar<span>S24CSEU2010</span></div>
+      </div>
+      <p style="margin-top:18px;font-weight:700;font-size:14px;">MENTOR: DR. SAKSHI</p>
+    </div>
+  </section>
+</main>
+
+<!-- ========================================================================
+     VIEW 2: ANALYZE MEDIA (PRIMARY WORKBENCH)
+     ======================================================================== -->
+<section id="view-analyze" class="view">
+  <div class="wrap">
+    <span class="tag" id="moduleTag">Inference Workbench</span>
+    <h2 class="disp sec-title" id="moduleTitle">Analyze Media.</h2>
+
+    <div class="banner-static">
+      <span>BACKEND REQUIRED &middot; PREDICTIONS COME ONLY FROM THE CONFIGURED API (NO SIMULATED RESULTS)</span>
+      <button class="btn sm alt" type="button" id="bannerApiBtn">Configure API</button>
+    </div>
+
+    <!-- 3-Pipeline Selector -->
+    <div class="pipe-tabs" role="tablist" aria-label="Detection Pipelines">
+      <button class="pipe-tab active" role="tab" aria-selected="true" data-pipe="fakeddit" type="button">
+        <span class="pt-code">PIPELINE 01 // BINARY + ABSTENTION</span>
+        <span class="pt-name">Fakeddit</span>
+        <span class="pt-sub">Image + Text Misinformation</span>
+      </button>
+      <button class="pipe-tab" role="tab" aria-selected="false" data-pipe="faceforensics" type="button">
+        <span class="pt-code">PIPELINE 02 // VIDEO FORENSICS</span>
+        <span class="pt-name">FaceForensics++</span>
+        <span class="pt-sub">MP4 Facial Manipulation</span>
+      </button>
+      <button class="pipe-tab" role="tab" aria-selected="false" data-pipe="snlive" type="button">
+        <span class="pt-code">PIPELINE 03 // 3-WAY NLI + MISMATCH</span>
+        <span class="pt-name">SNLI-VE + Mismatch</span>
+        <span class="pt-sub">Image + Text Consistency</span>
+      </button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Left Column: Media Upload & Preview -->
+      <div class="card">
+        <label class="field-lbl" id="uploadLabel">
+          <span>Media Input (JPG, JPEG, PNG)</span>
+          <span id="uploadReqBadge" class="tag red" style="margin:0;">REQUIRED</span>
+        </label>
+
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="mediaFileInput" accept="image/jpeg,image/png,image/jpg" aria-label="Upload media file">
+          <div id="dzPlaceholder">
+            <div class="dz-big" id="dzTitle">Drop<br>Image</div>
+            <p id="dzHint" style="font-size:12px;">JPG, JPEG, PNG &middot; max 15 MB</p>
+          </div>
+          <img id="imgPreview" alt="Uploaded image preview" hidden>
+          <video id="vidPreview" controls playsinline hidden></video>
+          <canvas id="vidSampleCanvas" width="420" height="240" hidden></canvas>
+        </div>
+
+        <div class="file-meta" id="fileMeta" style="display:none;">
+          <span id="fileMetaName">sample.jpg</span>
+          <span id="fileMetaInfo">0 KB</span>
+        </div>
+
+        <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn sm alt" id="loadSampleBtn" type="button">Load Sample Post</button>
+          <button class="btn sm alt" id="clearMediaBtn" type="button">Clear Input</button>
+        </div>
+
+        <!-- Pipeline-specific info legend -->
+        <div class="legend-box" id="pipelineLegend"></div>
+      </div>
+
+      <!-- Right Column: Text, Model, Mode, Advanced Config & Run -->
+      <div class="card">
+        <label class="field-lbl" for="textInput">
+          <span id="textLabel">Headline / Caption / Claim</span>
+          <span id="charCount">0 / 512 chars</span>
+        </label>
+        <textarea id="textInput" maxlength="512" placeholder="Enter the headline, caption, or claim associated with the image..."></textarea>
+        <p id="textHelperNote" style="font-size:11px;margin-top:6px;color:var(--muted);"></p>
+
+        <label class="field-lbl" for="modelSelect">
+          <span>Trained Model Checkpoint</span>
+          <span class="tag acid" style="margin:0;">CHAMPION DEFAULT</span>
+        </label>
+        <select id="modelSelect"></select>
+
+        <!-- Selected Architecture Badges -->
+        <div class="arch-badges" id="archBadges"></div>
+
+        <label class="field-lbl">
+          <span>Analysis Mode (Supported Only)</span>
+        </label>
+        <div class="mode-pills" id="modePills"></div>
+
+        <!-- SNLI-VE Non-Trained Mismatch Heuristic Toggle (shown only for SNLI-VE) -->
+        <div id="snliHeuristicBox" style="display:none;margin-top:14px;padding:10px 12px;border:3px dashed var(--ink);background:var(--bg);">
+          <label class="chk-line">
+            <input type="checkbox" id="snliHeuristicChk" checked>
+            <span>Apply Mismatch Detection Heuristic (Non-Trained Post-Hoc Rule)</span>
+          </label>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px;">
+            Post-hoc heuristic applied on top of CLIP/fusion outputs — not a separately trained multimodal neural model.
+          </p>
+        </div>
+
+        <!-- Collapsible Advanced Inference Configuration -->
+        <div class="adv-drawer">
+          <button class="adv-toggle" id="advToggleBtn" type="button" aria-expanded="false">
+            <span>Advanced Inference Configuration</span>
+            <span id="advChevron">+</span>
+          </button>
+          <div class="adv-body" id="advBody">
+            <p style="font-size:11px;margin-bottom:10px;">
+              By default, the backend applies the validation-calibrated temperature and abstention thresholds saved with the checkpoint. Enable override only for experimentation.
+            </p>
+            <label class="chk-line">
+              <input type="checkbox" id="overrideCalibChk">
+              <span>Override Calibrated Defaults</span>
+            </label>
+            <div class="adv-grid">
+              <div>
+                <label class="field-lbl" for="cfgTemp">Temperature (T)</label>
+                <input type="number" id="cfgTemp" step="0.05" min="0.1" max="5.0" value="1.24" disabled>
+              </div>
+              <div>
+                <label class="field-lbl" for="cfgConf">Confidence Thresh</label>
+                <input type="number" id="cfgConf" step="0.01" min="0.30" max="0.99" value="0.65" disabled>
+              </div>
+              <div>
+                <label class="field-lbl" for="cfgEnt">Max Norm. Entropy</label>
+                <input type="number" id="cfgEnt" step="0.01" min="0.05" max="0.99" value="0.72" disabled>
+              </div>
+            </div>
+            <div style="margin-top:12px;">
+              <label class="chk-line">
+                <input type="checkbox" id="cfgXaiChk" checked>
+                <span>Enable Explainable AI (XAI) Artifact Generation</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" id="runAnalysisBtn" type="button" style="width:100%;margin-top:18px;font-size:16px;">
+          Run Detection Pipeline &rarr;
+        </button>
+
+        <div class="err-box" id="analyzeErr" role="alert"></div>
+        <div class="terminal-steps" id="terminalSteps" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     VIEW 3: UNIFIED PREDICTION RESULTS & EXPLAINABLE AI (XAI)
+     ======================================================================== -->
+<section id="view-result" class="view">
+  <div class="wrap" id="resultContainer">
+    <!-- Dynamically populated by renderResultView() -->
+  </div>
+</section>
+
+<section id="view-unified" class="view">
+  <div class="wrap">
+    <span class="tag">Separate Task Results &middot; No Combined Score</span>
+    <h2 class="disp sec-title">Unified Analysis.</h2>
+    <div id="unifiedContent"></div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     VIEW 4: DASHBOARD
+     ======================================================================== -->
+<section id="view-dashboard" class="view">
+  <div class="wrap">
+    <span class="tag">Platform Telemetry &amp; Inference Overview</span>
+    <h2 class="disp sec-title">Analytics.</h2>
+    <div id="dashboardContent"></div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     VIEW 5: MODEL COMPARISON & LEADERBOARD
+     ======================================================================== -->
+<section id="view-models" class="view">
+  <div class="wrap">
+    <span class="tag">Independent Dataset Benchmarks &middot; Final Notebook Configurations</span>
+    <h2 class="disp sec-title">Model Leaderboard.</h2>
+
+    <div class="card" style="margin-bottom:18px;background:var(--acid);color:#000;">
+      <strong>MODEL SELECTION PROTOCOL &amp; DATA INTEGRITY:</strong>
+      Only architectures and configurations implemented in our final experiment notebooks are listed below. Pretrained feature extractors / encoders are distinguished from trained fusion heads, temporal models, and ensembles. No scores are ever fabricated—metrics populate exclusively from <code>GET /api/benchmark</code>.
+    </div>
+
+    <!-- Live Backend Benchmark Status Banner -->
+    <div id="benchmarkStatusBanner" class="banner-static" style="background:var(--card);color:var(--ink);">
+      <span id="benchmarkStatusText">BENCHMARK METRICS UNAVAILABLE &middot; Connect a live backend to fetch GET /api/benchmark.</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn sm" id="fetchBenchmarkBtn" type="button">Fetch GET /api/benchmark</button>
+        <button class="btn sm alt" id="lbApiConfigBtn" type="button">API Settings</button>
+      </div>
+    </div>
+
+    <div class="mode-pills" id="lbTabs" style="margin-bottom:16px;">
+      <button class="mode-pill active" data-lb="fakeddit" type="button">Fakeddit (8 Encoders &middot; 2 Fusion Configs)</button>
+      <button class="mode-pill" data-lb="faceforensics" type="button">FaceForensics++ (5 Experiments &middot; Video-Only)</button>
+      <button class="mode-pill" data-lb="snlive" type="button">SNLI-VE (1 Extractor &middot; 2 Fusion Heads)</button>
+    </div>
+
+    <div id="lbMetaBar" class="lb-meta-bar"></div>
+    <div id="leaderboardTableWrap" class="table-wrap"></div>
+    <div id="lbFootnote"></div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     VIEW 6: DATASETS INFORMATION
+     ======================================================================== -->
+<section id="view-datasets" class="view">
+  <div class="wrap">
+    <span class="tag">Provenance, Splits &amp; Preprocessing Dossiers</span>
+    <h2 class="disp sec-title">Datasets.</h2>
+
+    <div class="grid-3">
+      <!-- Fakeddit Dossier -->
+      <article class="card">
+        <span class="tag red">DATASET 01</span>
+        <h3 class="disp" style="font-size:28px;margin-bottom:8px;">Fakeddit</h3>
+        <p style="font-size:12px;margin-bottom:14px;">
+          <strong>Provenance:</strong> Reddit multimodal fake-news corpus (image + headline/title pairs).<br>
+          <strong>Modalities:</strong> Image (RGB) + Text.<br>
+          <strong>Implemented Configs:</strong> 4 Text Encoders, 4 Visual Encoders, Concatenation Fusion &amp; Weighted Late Fusion.<br>
+          <strong>Split Counts:</strong> Populated from <code>GET /api/datasets</code>.
+        </p>
+        <div class="legend-box">
+          <strong>PREPROCESSING &amp; LEAKAGE CONTROL:</strong>
+          <ul style="margin:6px 0 0 16px;line-height:1.55;">
+            <li>HTML &amp; Unicode normalization</li>
+            <li>URL standardization</li>
+            <li>Text normalization preserving meaningful casing, negation &amp; hashtags</li>
+            <li>RGB image validation</li>
+            <li>Perceptual hashing (dHash) deduplication</li>
+            <li>Grouped splitting to prevent image-reuse leakage</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- FaceForensics++ Dossier -->
+      <article class="card">
+        <span class="tag red">DATASET 02</span>
+        <h3 class="disp" style="font-size:28px;margin-bottom:8px;">FaceForensics++</h3>
+        <p style="font-size:12px;margin-bottom:14px;">
+          <strong>Provenance:</strong> Large-scale facial manipulation forensic video benchmark.<br>
+          <strong>Modalities:</strong> Video-Only (MP4 frames — no text-video fusion).<br>
+          <strong>Implemented Experiments:</strong> Xception, EfficientNet-B4, ResNet-50 (Frame), OrderedLSTM (Temporal), Two-Model Frame Ensemble.<br>
+          <strong>Categories:</strong> Original, Deepfakes, Face2Face, FaceSwap, NeuralTextures.
+        </p>
+        <div class="legend-box">
+          <strong>PREPROCESSING &amp; LEAKAGE CONTROL:</strong>
+          <ul style="margin:6px 0 0 16px;line-height:1.55;">
+            <li>Source-video-level grouping (zero identity/source leakage across splits)</li>
+            <li>Uniform temporal frame sampling</li>
+            <li>Facial region detection &amp; cropping</li>
+            <li>Blending-seam margin preservation around face boundaries</li>
+            <li>Standardized frame resizing &amp; normalization</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- SNLI-VE Dossier -->
+      <article class="card">
+        <span class="tag red">DATASET 03</span>
+        <h3 class="disp" style="font-size:28px;margin-bottom:8px;">SNLI-VE + Mismatch</h3>
+        <p style="font-size:12px;margin-bottom:14px;">
+          <strong>Provenance:</strong> Stanford Natural Language Inference Visual Entailment + Custom Mismatch Suite.<br>
+          <strong>Modalities:</strong> Premise Image + Hypothesis Text.<br>
+          <strong>Implemented Configs:</strong> Frozen CLIP Feature Extractor + supervised <code>clip_concat</code> &amp; <code>clip_interactions</code> fusion heads (+ non-trained mismatch heuristic).<br>
+          <strong>NLI Mapping:</strong> Entailment &rarr; REAL, Contradiction &rarr; FAKE, Neutral &rarr; UNCERTAIN.
+        </p>
+        <div class="legend-box">
+          <strong>PREPROCESSING &amp; EVALUATION:</strong>
+          <ul style="margin:6px 0 0 16px;line-height:1.55;">
+            <li>Strict image-disjoint train / val / test splitting</li>
+            <li>Text preprocessing &amp; CLIP tokenization</li>
+            <li>Premise-image &amp; hypothesis pairing</li>
+            <li>3-class visual entailment with separate NLI vs. user-facing fields</li>
+            <li>Post-hoc mismatch heuristic categories: <code>match</code>, <code>unrelated_caption</code>, <code>manipulated_matching</code>, <code>manipulated_misleading</code></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     VIEW 7: DETECTION HISTORY
+     ======================================================================== -->
+<section id="view-history" class="view">
+  <div class="wrap">
+    <span class="tag">Session Persistence &middot; Syncs with /api/history when backend active</span>
+    <h2 class="disp sec-title">Recent Analyses.</h2>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="grid-3" style="gap:12px;">
+        <div>
+          <label class="field-lbl" for="histSearch">Search ID / Filename</label>
+          <input type="text" id="histSearch" placeholder="e.g. FC- or sample...">
+        </div>
+        <div>
+          <label class="field-lbl" for="histDataset">Filter Dataset</label>
+          <select id="histDataset">
+            <option value="all">All Datasets</option>
+            <option value="fakeddit">Fakeddit</option>
+            <option value="faceforensics">FaceForensics++</option>
+            <option value="snlive">SNLI-VE + Mismatch</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl" for="histVerdict">Filter Verdict</label>
+          <select id="histVerdict">
+            <option value="all">All Verdicts</option>
+            <option value="REAL">REAL</option>
+            <option value="FAKE">FAKE</option>
+            <option value="UNCERTAIN">UNCERTAIN</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label for="histSort" style="font-size:12px;font-weight:700;">SORT:</label>
+          <select id="histSort" style="width:auto;padding:6px 10px;">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+        <button class="btn sm danger" id="clearHistoryBtn" type="button">Clear Session History</button>
+      </div>
+    </div>
+
+    <div id="historyContent"></div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     API CONFIGURATION & CONTRACT MODAL
+     ======================================================================== -->
+<div class="modal-backdrop" id="apiModal" role="dialog" aria-modal="true" aria-labelledby="apiModalTitle">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 id="apiModalTitle" class="disp" style="font-size:28px;">Backend API Contract</h3>
+      <button class="btn sm alt" id="closeApiModal" type="button">CLOSE &times;</button>
+    </div>
+
+    <p style="font-size:12px;margin-bottom:14px;">
+      All predictions are requested from this inference server; nothing is simulated in the browser. Set the base URL of your FastAPI/Flask server below.
+    </p>
+
+    <label class="field-lbl" for="apiBaseInput">Backend Base URL</label>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input type="url" id="apiBaseInput" value="http://localhost:8000" placeholder="http://localhost:8000">
+      <button class="btn sm" id="saveApiBtn" type="button">Save</button>
+    </div>
+
+    <div class="table-wrap" style="box-shadow:none;">
+      <table class="brut" style="font-size:11px;">
+        <thead>
+          <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pill pill-REAL">GET</span></td><td><code>/api/health</code></td><td>Backend health &amp; loaded checkpoints</td></tr>
+          <tr><td><span class="pill pill-REAL">GET</span></td><td><code>/api/datasets</code></td><td>Dataset metadata &amp; supported modalities</td></tr>
+          <tr><td><span class="pill pill-REAL">GET</span></td><td><code>/api/models</code></td><td>Available checkpoints &amp; champion defaults</td></tr>
+          <tr><td><span class="pill pill-REAL">GET</span></td><td><code>/api/benchmark</code></td><td>Saved validation/test evaluation metrics</td></tr>
+          <tr><td><span class="pill pill-FAKE">POST</span></td><td><code>/api/predict/fakeddit</code></td><td>Image + Text misinformation inference</td></tr>
+          <tr><td><span class="pill pill-FAKE">POST</span></td><td><code>/api/predict/faceforensics</code></td><td>MP4 facial manipulation forensics</td></tr>
+          <tr><td><span class="pill pill-FAKE">POST</span></td><td><code>/api/predict/snlive</code></td><td>Image + Hypothesis NLI &amp; mismatch</td></tr>
+          <tr><td><span class="pill pill-UNCERTAIN">GET/DEL</span></td><td><code>/api/history/{id}</code></td><td>Persistent analysis history CRUD</td></tr>
+          <tr><td><span class="pill pill-REAL">GET</span></td><td><code>/api/reports/{id}</code></td><td>Exportable PDF / JSON forensic report</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Footer -->
+<footer>
+  FAKE/CHECK &middot; B.Tech CSE NLP Research Project (CSET 346 &middot; PID-07) &middot; Live Backend Required &middot; Independent Multimodal Pipelines
+</footer>
+
+<script>
+/* ==========================================================================
+   APPLICATION STATE & PIPELINE DEFINITIONS
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  const STORAGE_KEY_HISTORY = 'fakecheck_history_v1';
+  const STORAGE_KEY_THEME = 'fakecheck_theme_v1';
+  const STORAGE_KEY_API = 'fakecheck_api_base_v1';
+
+  const PIPELINES = {
+    fakeddit: {
+      id: 'fakeddit',
+      name: 'Fakeddit',
+      subtitle: 'Image + Text Misinformation',
+      mediaType: 'image',
+      accept: 'image/jpeg,image/png,image/jpg',
+      uploadLabel: 'Media Input (JPG, JPEG, PNG)',
+      dzTitle: 'Drop<br>Image',
+      dzHint: 'JPG, JPEG, PNG · max 15 MB',
+      textLabel: 'Headline / Caption / Claim',
+      textPlaceholder: 'Enter the headline, caption, or claim associated with the image...',
+      sampleBtnText: 'Load Sample Post',
+      legendHtml: '<strong>FAKEDDIT PIPELINE:</strong> Binary misinformation classifier with validation-calibrated temperature scaling and Shannon entropy abstention. Implemented fusion heads: <code>Concatenation Fusion</code> and <code>Weighted Late Fusion</code> (Cross-Modal Attention was not implemented in final experiments).',
+      models: [
+        { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder) [Primary]', textEnc: 'CLIP Text (ViT-B/16)', visEnc: 'CLIP Vision (ViT-B/16)', fusion: '2049->256 Interaction Projection', modes: ['multimodal'], xai: ['text', 'image'], defaultTemp: 1.276, defaultConf: 0.65, defaultEnt: 0.72 }
+      ]
+    },
+    faceforensics: {
+      id: 'faceforensics',
+      name: 'FaceForensics++',
+      subtitle: 'Video Facial Manipulation (Video-Only)',
+      mediaType: 'video',
+      accept: 'video/mp4',
+      uploadLabel: 'Video Input (MP4)',
+      dzTitle: 'Drop<br>MP4 Video',
+      dzHint: 'MP4 format · Uniform frame sampling + face-crop forensics',
+      textLabel: 'Context Text (Not Supported — Video-Only Pipeline)',
+      textPlaceholder: 'Disabled: FaceForensics++ is strictly a video-only pipeline (no text-video fusion).',
+      sampleBtnText: 'Load Sample Forensic Clip',
+      legendHtml: '<strong>VIDEO-ONLY PIPELINE:</strong> Strictly video-based facial forensics (no text-video fusion). Implemented experiments: Frame-Level Models (<code>Xception</code>, <code>EfficientNet-B4</code>, <code>ResNet-50</code>), Temporal Modelling (<code>OrderedLSTM</code>), and <code>Two-Model Frame Ensemble</code>.',
+      models: [
+        { id: 'ff_xception_bilstm', name: 'Xception + BiLSTM [Primary Video-Level]', textEnc: 'None (Video-Only)', visEnc: 'Xception (2048-d) + BiLSTM (256x2)', fusion: 'Packed Sequence BiLSTM', modes: ['video-only'], supportsText: false, supportsFamily: false, xai: ['video'], defaultTemp: 1.0, defaultConf: 0.25, defaultEnt: 0.68 }
+      ]
+    },
+    snlive: {
+      id: 'snlive',
+      name: 'SNLI-VE + Custom Mismatch',
+      subtitle: 'Image + Text Semantic Consistency',
+      mediaType: 'image',
+      accept: 'image/jpeg,image/png,image/jpg',
+      uploadLabel: 'Premise Image (JPG, JPEG, PNG)',
+      dzTitle: 'Drop<br>Premise Image',
+      dzHint: 'JPG, JPEG, PNG · CLIP Feature Extraction + Supervised Fusion',
+      textLabel: 'Hypothesis / Caption',
+      textPlaceholder: 'Enter a hypothesis or caption describing the uploaded image...',
+      sampleBtnText: 'Load Sample Pair',
+      legendHtml: '<strong>NLI LABELS:</strong> <code>Entailment</code> &middot; <code>Neutral</code> &middot; <code>Contradiction</code> describe how the sentence relates to the image. Contradiction is not a deepfake label.<br><strong>IMPLEMENTED HEADS:</strong> Frozen <code>CLIP Feature Extractor</code> feeding supervised <code>clip_concat</code> or <code>clip_interactions</code>. Mismatch detection uses a non-trained post-hoc heuristic.',
+      models: [
+        { id: 'snli_blip', name: 'BLIP (Salesforce/blip-itm-base-coco) [Primary]', textEnc: 'BLIP Text Encoder', visEnc: 'BLIP Vision Encoder', fusion: 'Cross-Attention + 768->256->3 Branch', modes: ['multimodal'], xai: ['text', 'image'], defaultTemp: 1.0, defaultConf: 0.60, defaultEnt: 0.78 }
+      ]
+    }
+  };
+
+  /* Exact Leaderboard Registry matching final experiment notebooks (ZERO fabricated scores) */
+  const VALID_STATUSES = ['Trained', 'Evaluated', 'Planned', 'Unavailable'];
+
+  function createEmptyMetrics() {
+    return { accuracy: null, precision: null, recall: null, macro_f1: null, roc_auc: null };
+  }
+
+  const LEADERBOARD_DATA = {
+    fakeddit: [
+      { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder)', role: 'Primary Multimodal', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'fk_m4_vilt', name: 'M4_vilt (ViLT)', role: 'Secondary Multimodal', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'fk_m1_text', name: 'M1_text (RoBERTa-base)', role: 'Secondary Text Encoder', roleClass: 'role-text', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'fk_m2_image', name: 'M2_image (ConvNeXt-Tiny)', role: 'Secondary Visual Encoder', roleClass: 'role-vis', metrics: createEmptyMetrics(), status: 'Unavailable' }
+    ],
+    faceforensics: [
+      { id: 'ff_xception_bilstm', name: 'Xception + BiLSTM (Video-level)', role: 'Primary Temporal Model', roleClass: 'role-temp', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'ff_efficientnet_b4', name: 'EfficientNet-B4', role: 'Secondary Frame-Level', roleClass: 'role-frame', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'ff_xception', name: 'Xception', role: 'Secondary Frame-Level', roleClass: 'role-frame', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'ff_resnet50', name: 'ResNet-50', role: 'Secondary Frame-Level', roleClass: 'role-frame', metrics: createEmptyMetrics(), status: 'Unavailable' }
+    ],
+    snlive: [
+      { id: 'snli_blip', name: 'BLIP (Salesforce/blip-itm-base-coco)', role: 'Primary Visual Entailment', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'snli_vilt', name: 'ViLT (dandelin/vilt-b32-mlm)', role: 'Secondary Visual Entailment', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'snli_bridgetower', name: 'BridgeTower', role: 'Secondary Visual Entailment', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' }
+    ]
+  };
+
+  const LEADERBOARD_META = {
+    fakeddit: {
+      badges: ['4 Text Encoders', '4 Visual Encoders', '2 Trained Fusion Heads'],
+      footnoteHtml: `
+        <div class="lb-footnote">
+          <strong>NOTE ON EXCLUDED ARCHITECTURE:</strong> Cross-Modal Attention Fusion was excluded from the final Fakeddit experiments and is therefore not listed in the benchmark table above.
+          <span class="pill pill-Planned" style="margin-left:8px;">Planned</span> <span style="font-size:11px;color:var(--muted);">(Not Implemented)</span>
+        </div>
+      `
+    },
+    faceforensics: {
+      badges: ['3 Frame-Level Models', '1 Temporal Model', '1 Frame Ensemble', 'Video-Only Pipeline (No Text-Video Fusion)'],
+      footnoteHtml: `
+        <div class="lb-footnote">
+          <strong>PIPELINE SCOPE:</strong> FaceForensics++ is strictly a <strong>video-only</strong> forensic pipeline. Frame-level CNNs, sequential temporal modelling (<code>OrderedLSTM</code>), and the <code>Two-Model Frame Ensemble</code> represent distinct experimental stages rather than 5 identical independently trained models.
+        </div>
+      `
+    },
+    snlive: {
+      badges: ['1 Pretrained Feature Extractor', '2 Supervised Fusion Heads'],
+      footnoteHtml: `
+        <div class="lb-callout">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <strong style="font-family:'Archivo Black',sans-serif;font-size:18px;text-transform:uppercase;">Mismatch Detection Heuristic (Non-Trained)</strong>
+            <span class="pill pill-Planned">Post-Hoc Rule / Heuristic</span>
+          </div>
+          <p style="font-size:12px;">
+            Implemented as a post-hoc rule/heuristic for mismatch detection — not a separately trained multimodal neural model. It is intentionally separated from the trained SNLI-VE fusion heads above.
+          </p>
+        </div>
+      `
+    }
+  };
+
+  let benchmarkState = {
+    connected: false,
+    message: 'BENCHMARK METRICS UNAVAILABLE · Connect a live backend to fetch GET /api/benchmark.',
+    lastFetched: null
+  };
+
+  /* Runtime State */
+  let currentView = 'home';
+  let activePipe = 'fakeddit';
+  let activeMode = 'multimodal';
+  let isRunning = false;
+  let uploadedMedia = null; // { type: 'image'|'video'|'canvas', src, name, size, duration }
+  let sampleAnimId = null;
+  let currentResult = null;
+  let historyList = loadHistory();
+  let activeLbTab = 'fakeddit';
+  let lbSort = { col: null, asc: true };
+
+  /* ==========================================================================
+     CORE UTILITIES & SESSION STORAGE
+     ========================================================================== */
+  const $ = (id) => document.getElementById(id);
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const el = $('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_HISTORY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(historyList.slice(0, 50)));
+    } catch {
+      // Ignore storage quota errors in static preview
+    }
+  }
+
+  /* ==========================================================================
+     NEWSPAPER INTRO CURTAIN
+     ========================================================================== */
+  const introEl = $('intro');
+  document.body.style.overflow = 'hidden';
+
+  function dismissIntro() {
+    if (!introEl) return;
+    introEl.classList.add('gone');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      introEl.style.display = 'none';
+    }, 920);
+  }
+
+  $('enterBtn').addEventListener('click', dismissIntro);
+  $('skipIntroBtn').addEventListener('click', dismissIntro);
+
+  /* ==========================================================================
+     THEME TOGGLE (LIGHT / DARK)
+     ========================================================================== */
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    $('themeToggle').textContent = theme === 'dark' ? 'LIGHT' : 'DARK';
+    try { localStorage.setItem(STORAGE_KEY_THEME, theme); } catch {}
+  }
+
+  const savedTheme = (() => {
+    try { return localStorage.getItem(STORAGE_KEY_THEME); } catch { return null; }
+  })();
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    $('themeToggle').textContent = prefersDark ? 'LIGHT' : 'DARK';
+  }
+
+  $('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const isDark = cur === 'dark' || (!cur && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(isDark ? 'light' : 'dark');
+  });
+
+  /* ==========================================================================
+     HERO SCANNER ANIMATION & SCROLL REVEAL
+     ========================================================================== */
+  let scanVal = 0;
+  setInterval(() => {
+    scanVal = (scanVal + 7) % 101;
+    $('scanPct').textContent = (scanVal < 10 ? '0' : '') + scanVal + '%';
+    const mouth = $('scanMouth');
+    const statusTxt = $('scanStatusTxt');
+    if (scanVal > 75) {
+      mouth.setAttribute('d', 'M54 82 Q70 70 86 82');
+      statusTxt.textContent = 'ANOMALY CHECK';
+    } else if (scanVal > 40) {
+      mouth.setAttribute('d', 'M54 78 L86 78');
+      statusTxt.textContent = 'CROSS-ATTN...';
+    } else {
+      mouth.setAttribute('d', 'M55 76 Q70 88 85 76');
+      statusTxt.textContent = 'SCANNING...';
+    }
+  }, 150);
+
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        revealObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.rv').forEach((el) => revealObs.observe(el));
+
+  /* ==========================================================================
+     SPA NAVIGATION
+     ========================================================================== */
+  const MODULE_PIPE = { video: 'faceforensics', fakenews: 'fakeddit', verify: 'snlive' };
+  const PIPE_NAV = { faceforensics: 'video', fakeddit: 'fakenews', snlive: 'verify' };
+  const MODULE_TITLES = {
+    faceforensics: ['FaceForensics++ \u00b7 Face / Video Manipulation', 'Video Detection.'],
+    fakeddit: ['Fakeddit \u00b7 Image-Text Misinformation', 'Fake News Detection.'],
+    snlive: ['SNLI-VE \u00b7 Image-Sentence Entailment', 'Image-Text Verification.']
+  };
+
+  function navigateTo(viewName) {
+    currentView = viewName;
+    let sections, navKey, scrollId = null;
+    if (MODULE_PIPE[viewName]) {
+      if (activePipe !== MODULE_PIPE[viewName]) selectPipeline(MODULE_PIPE[viewName]);
+      sections = ['analyze']; navKey = viewName;
+    } else if (viewName === 'analyze' || viewName === 'result') {
+      sections = [viewName]; navKey = PIPE_NAV[activePipe];
+    } else if (['analytics', 'dashboard', 'models', 'datasets'].includes(viewName)) {
+      sections = ['dashboard', 'models', 'datasets']; navKey = 'analytics';
+    } else if (viewName === 'history' || viewName === 'home') {
+      sections = ['home', 'history']; navKey = 'home';
+      if (viewName === 'history') scrollId = 'view-history';
+    } else {
+      sections = [viewName]; navKey = viewName;
+    }
+    if (sections.includes('analyze')) {
+      const t = MODULE_TITLES[activePipe];
+      $('moduleTag').textContent = t[0]; $('moduleTitle').textContent = t[1];
+    }
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+    sections.forEach((id) => { const el = $('view-' + id); if (el) el.classList.add('active'); });
+    document.querySelectorAll('.nav-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.view === navKey);
+    });
+
+    $('mobileDrawer').classList.remove('open');
+    if (scrollId) $(scrollId).scrollIntoView({ behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (sections.includes('dashboard')) renderDashboard();
+    if (sections.includes('models')) renderLeaderboard();
+    if (sections.includes('history')) renderHistory();
+    if (sections.includes('unified')) renderUnified();
+  }
+
+  /* Common result format (document section 6): task-specific labels are preserved. */
+  function standardResult(r) {
+    const nli = r.dataset === 'snlive';
+    const warnings = (r.warnings || []).slice();
+    if (r.calibration && r.calibration.routedUncertain) warnings.push('Abstained: ' + (r.calibration.abstentionReason || 'low confidence'));
+    return {
+      module: r.dataset,
+      prediction: nli ? r.prediction.nliClass : r.prediction.label,
+      scores: nli ? r.prediction.nliProbs : (r.prediction.classProbs || {}),
+      confidence: r.prediction.confidence != null
+        ? { value: r.prediction.confidence, definition: 'highest class probability reported by the pipeline' } : null,
+      model_name: r.model && r.model.model_name,
+      evidence: (r.xai && r.xai.tabs) || [],
+      warnings
+    };
+  }
+
+  function renderUnified() {
+    const panels = [
+      ['faceforensics', 'Manipulation Assessment', 'FaceForensics++ \u00b7 face / video manipulation', 'video'],
+      ['fakeddit', 'Misinformation Classification', 'Fakeddit \u00b7 image-text post', 'fakenews'],
+      ['snlive', 'Image-Sentence Entailment', 'SNLI-VE \u00b7 Entailment / Neutral / Contradiction', 'verify']
+    ];
+    const latest = {};
+    historyList.forEach((r) => { if (!latest[r.dataset]) latest[r.dataset] = r; });
+    const ran = panels.filter((p) => latest[p[0]]).map((p) => p[2].split(' \u00b7 ')[0]);
+    const cards = panels.map(([id, title, sub, nav]) => {
+      const r = latest[id];
+      if (!r) return `<div class="card"><span class="tag">${title}</span><h3 class="disp" style="font-size:24px;margin:10px 0;">Not run</h3><p class="muted" style="font-size:12px;margin-bottom:12px;">${sub}</p><button class="btn sm" data-unified-go="${nav}" type="button">Run module</button></div>`;
+      const st = standardResult(r);
+      const scores = Object.entries(st.scores).map(([k, v]) => `<li>${escapeHtml(k)}: ${(v * 100).toFixed(1)}%</li>`).join('');
+      const conf = st.confidence ? `${(st.confidence.value * 100).toFixed(1)}% <span class="muted">(${st.confidence.definition})</span>` : 'not defined';
+      return `<div class="card"><span class="tag">${title}</span><h3 class="disp" style="font-size:28px;margin:10px 0;">${escapeHtml(st.prediction)}</h3><p class="muted" style="font-size:12px;">${sub}<br>Model: ${escapeHtml(st.model_name || 'n/a')}</p><ul style="margin:10px 0 10px 18px;font-size:12px;">${scores}</ul><p style="font-size:12px;"><strong>Confidence:</strong> ${conf}</p><p style="font-size:12px;"><strong>Evidence:</strong> ${st.evidence.length ? st.evidence.join(', ') : 'none generated'}</p><p class="muted" style="font-size:11px;margin-top:6px;">${st.warnings.map(escapeHtml).join('<br>')}</p><button class="btn sm alt" data-unified-go="${nav}" type="button" style="margin-top:10px;">Re-run module</button></div>`;
+    }).join('');
+    $('unifiedContent').innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+        <strong>Evidence summary.</strong> ${ran.length ? 'Modules run: ' + ran.join(', ') + '.' : 'No modules have been run yet.'}
+        <span class="muted"> Each panel answers a different question with its own label set. Scores are never averaged across tasks, and no panel proves another panel's conclusion. Contradiction (SNLI-VE) describes the image-sentence relation, not a deepfake label.</span>
+      </div>
+      <div class="grid-3">${cards}</div>`;
+    $('unifiedContent').querySelectorAll('[data-unified-go]').forEach((b) => b.addEventListener('click', () => navigateTo(b.dataset.unifiedGo)));
+  }
+
+  document.querySelectorAll('.nav-btn').forEach((btn) => {
+    btn.addEventListener('click', () => navigateTo(btn.dataset.view));
+  });
+
+  $('brandHome').addEventListener('click', () => navigateTo('home'));
+  $('mobileMenuBtn').addEventListener('click', () => {
+    $('mobileDrawer').classList.toggle('open');
+  });
+
+  document.querySelectorAll('[data-go]').forEach((btn) => {
+    btn.addEventListener('click', () => navigateTo(btn.dataset.go));
+  });
+
+  document.querySelectorAll('[data-launch-pipe]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selectPipeline(btn.dataset.launchPipe);
+      navigateTo('analyze');
+    });
+  });
+
+  /* ==========================================================================
+     API MODAL
+     ========================================================================== */
+  const savedApi = (() => { try { return localStorage.getItem(STORAGE_KEY_API); } catch { return null; } })();
+  if (savedApi) $('apiBaseInput').value = savedApi;
+  else if (window.location && window.location.origin && window.location.origin !== 'null') $('apiBaseInput').value = window.location.origin;
+
+  function openApiModal() { $('apiModal').classList.add('open'); }
+  function closeApiModal() { $('apiModal').classList.remove('open'); }
+
+  $('openApiModal').addEventListener('click', openApiModal);
+  $('bannerApiBtn').addEventListener('click', openApiModal);
+  $('closeApiModal').addEventListener('click', closeApiModal);
+  $('apiModal').addEventListener('click', (e) => {
+    if (e.target === $('apiModal')) closeApiModal();
+  });
+
+  $('saveApiBtn').addEventListener('click', () => {
+    const val = $('apiBaseInput').value.trim().replace(/\/+$/, '');
+    if (!val) {
+      showToast('Enter a valid URL');
+      return;
+    }
+    try { localStorage.setItem(STORAGE_KEY_API, val); } catch {}
+    showToast('API URL saved — fetching GET /api/benchmark...');
+    closeApiModal();
+    fetchBenchmarkData();
+  });
+
+  $('lbApiConfigBtn').addEventListener('click', openApiModal);
+  $('fetchBenchmarkBtn').addEventListener('click', fetchBenchmarkData);
+
+  /* ==========================================================================
+     REAL BACKEND INTEGRATION: GET /api/benchmark
+     ========================================================================== */
+  function normalizeKey(str) {
+    return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function normalizeStatus(rawStatus, hasMetrics) {
+    if (rawStatus) {
+      const match = VALID_STATUSES.find((s) => s.toLowerCase() === String(rawStatus).trim().toLowerCase());
+      if (match) return match;
+    }
+    return hasMetrics ? 'Evaluated' : 'Unavailable';
+  }
+
+  function parseMetricNum(val) {
+    if (val === null || val === undefined || val === '') return null;
+    const n = Number(val);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function resetAllLeaderboardMetrics() {
+    Object.keys(LEADERBOARD_DATA).forEach((ds) => {
+      LEADERBOARD_DATA[ds].forEach((row) => {
+        row.metrics = createEmptyMetrics();
+        row.status = 'Unavailable';
+      });
+    });
+  }
+
+  async function fetchBenchmarkData() {
+    const baseUrl = ($('apiBaseInput').value || '').trim().replace(/\/+$/, '');
+    if (!baseUrl) {
+      benchmarkState.connected = false;
+      benchmarkState.message = 'BENCHMARK METRICS UNAVAILABLE · No Backend Base URL configured.';
+      updateBenchmarkBanner();
+      return;
+    }
+
+    const btn = $('fetchBenchmarkBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Fetching...';
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(`${baseUrl}/api/benchmark`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+
+      const payload = await res.json();
+      resetAllLeaderboardMetrics();
+
+      let matchedCount = 0;
+
+      // Support both { fakeddit: [...], faceforensics: [...], snlive: [...] } and { benchmarks: [...] } or flat [...]
+      const applyListToDataset = (dsKey, list) => {
+        if (!Array.isArray(list) || !LEADERBOARD_DATA[dsKey]) return;
+        list.forEach((item) => {
+          if (!item || typeof item !== 'object') return;
+          const candId = normalizeKey(item.id || item.model_id || item.config_id || '');
+          const candName = normalizeKey(item.name || item.model_name || item.model || '');
+
+          const target = LEADERBOARD_DATA[dsKey].find((row) =>
+            (candId && normalizeKey(row.id) === candId) ||
+            (candName && normalizeKey(row.name) === candName) ||
+            (candName && normalizeKey(row.id) === candName)
+          );
+          if (!target) return;
+
+          const srcMetrics = item.metrics && typeof item.metrics === 'object' ? item.metrics : item;
+          const acc = parseMetricNum(srcMetrics.accuracy ?? srcMetrics.acc);
+          const prec = parseMetricNum(srcMetrics.precision ?? srcMetrics.prec);
+          const rec = parseMetricNum(srcMetrics.recall ?? srcMetrics.rec);
+          const f1 = parseMetricNum(srcMetrics.macro_f1 ?? srcMetrics.macroF1 ?? srcMetrics.f1);
+          const auc = parseMetricNum(srcMetrics.roc_auc ?? srcMetrics.rocAuc ?? srcMetrics.auc);
+
+          target.metrics = {
+            accuracy: acc,
+            precision: prec,
+            recall: rec,
+            macro_f1: f1,
+            roc_auc: auc
+          };
+
+          const hasAnyMetric = [acc, prec, rec, f1, auc].some((v) => v !== null);
+          target.status = normalizeStatus(item.status, hasAnyMetric);
+          matchedCount++;
+        });
+      };
+
+      const root = (payload && typeof payload === 'object' && payload.datasets && typeof payload.datasets === 'object')
+        ? payload.datasets
+        : payload;
+
+      if (Array.isArray(root)) {
+        ['fakeddit', 'faceforensics', 'snlive'].forEach((dsKey) => {
+          const subset = root.filter((item) => normalizeKey(item.dataset).includes(dsKey.replace('snlive', 'snli')));
+          applyListToDataset(dsKey, subset);
+        });
+      } else if (root && typeof root === 'object') {
+        if (Array.isArray(root.benchmarks)) {
+          ['fakeddit', 'faceforensics', 'snlive'].forEach((dsKey) => {
+            const subset = root.benchmarks.filter((item) => normalizeKey(item.dataset).includes(dsKey.replace('snlive', 'snli')));
+            applyListToDataset(dsKey, subset);
+          });
+        } else {
+          Object.keys(root).forEach((k) => {
+            const nk = normalizeKey(k);
+            if (nk.includes('fakeddit')) applyListToDataset('fakeddit', root[k]);
+            else if (nk.includes('faceforensics') || nk.includes('ffpp')) applyListToDataset('faceforensics', root[k]);
+            else if (nk.includes('snli')) applyListToDataset('snlive', root[k]);
+          });
+        }
+      }
+
+      benchmarkState.connected = true;
+      benchmarkState.lastFetched = new Date().toLocaleTimeString();
+      benchmarkState.message = matchedCount > 0
+        ? `LIVE BENCHMARK SYNCED (${matchedCount} config(s) updated from GET ${baseUrl}/api/benchmark at ${benchmarkState.lastFetched}).`
+        : `BACKEND CONNECTED (GET ${baseUrl}/api/benchmark) · No matching benchmark metrics returned.`;
+      showToast(matchedCount > 0 ? `Synced ${matchedCount} benchmark record(s)` : 'Connected — no benchmark metrics returned');
+    } catch (err) {
+      resetAllLeaderboardMetrics();
+      benchmarkState.connected = false;
+      benchmarkState.message = `BENCHMARK METRICS UNAVAILABLE · Could not reach GET ${baseUrl}/api/benchmark (${err.name === 'AbortError' ? 'Timeout' : err.message}).`;
+      showToast('Backend unreachable — displaying Unavailable');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Fetch GET /api/benchmark';
+      }
+      updateBenchmarkBanner();
+      renderLeaderboard();
+      if (currentView === 'dashboard') renderDashboard();
+    }
+  }
+
+  function updateBenchmarkBanner() {
+    const txt = $('benchmarkStatusText');
+    const bar = $('benchmarkStatusBanner');
+    if (txt) txt.textContent = benchmarkState.message;
+    if (bar) {
+      bar.style.background = benchmarkState.connected ? 'var(--green)' : 'var(--card)';
+      bar.style.color = benchmarkState.connected ? '#000' : 'var(--ink)';
+    }
+  }
+
+  /* ==========================================================================
+     ANALYZE WORKBENCH LOGIC
+     ========================================================================== */
+  function stopSampleCanvasAnim() {
+    if (sampleAnimId) {
+      cancelAnimationFrame(sampleAnimId);
+      sampleAnimId = null;
+    }
+  }
+
+  function clearMedia() {
+    stopSampleCanvasAnim();
+    uploadedMedia = null;
+    $('mediaFileInput').value = '';
+    $('imgPreview').hidden = true;
+    $('imgPreview').src = '';
+    $('vidPreview').hidden = true;
+    $('vidPreview').src = '';
+    $('vidSampleCanvas').hidden = true;
+    $('dzPlaceholder').hidden = false;
+    $('fileMeta').style.display = 'none';
+  }
+
+  function getSelectedModel() {
+    const pipe = PIPELINES[activePipe];
+    const id = $('modelSelect').value;
+    return pipe.models.find((m) => m.id === id) || pipe.models[0];
+  }
+
+  function updateArchAndModes() {
+    const pipe = PIPELINES[activePipe];
+    const model = getSelectedModel();
+
+    // Update architecture badges
+    $('archBadges').innerHTML =
+      `<span>TEXT: ${model.textEnc}</span>` +
+      `<span>VISION: ${model.visEnc}</span>` +
+      `<span>FUSION: ${model.fusion}</span>`;
+
+    // Sync default calibration values if not overridden
+    if (!$('overrideCalibChk').checked) {
+      $('cfgTemp').value = model.defaultTemp;
+      $('cfgConf').value = model.defaultConf;
+      $('cfgEnt').value = model.defaultEnt;
+    }
+
+    // Build mode pills
+    const allPossibleModes = pipe.id === 'faceforensics'
+      ? ['video-only']
+      : (pipe.id === 'snlive' ? ['multimodal'] : ['multimodal', 'text-only', 'image-only']);
+
+    if (!model.modes.includes(activeMode)) {
+      activeMode = model.modes[0];
+    }
+
+    $('modePills').innerHTML = allPossibleModes.map((m) => {
+      const supported = model.modes.includes(m);
+      const isAct = activeMode === m && supported;
+      const label = m.replace('-', ' ').toUpperCase();
+      return `<button type="button" class="mode-pill ${isAct ? 'active' : ''}" data-mode="${m}" ${supported ? '' : 'disabled title="Not supported by selected configuration"'}>${label}</button>`;
+    }).join('');
+
+    $('modePills').querySelectorAll('.mode-pill:not(:disabled)').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeMode = btn.dataset.mode;
+        updateArchAndModes();
+      });
+    });
+
+    // Show SNLI-VE non-trained mismatch heuristic toggle only on SNLI-VE
+    const snliBox = $('snliHeuristicBox');
+    if (snliBox) snliBox.style.display = pipe.id === 'snlive' ? 'block' : 'none';
+
+    // Update input requirement badges and text disabled state
+    const textEl = $('textInput');
+    const helper = $('textHelperNote');
+    if (pipe.id === 'faceforensics') {
+      textEl.disabled = true;
+      textEl.value = '';
+      helper.textContent = 'Disabled: FaceForensics++ is strictly a video-only pipeline (no text-video fusion).';
+      $('uploadReqBadge').textContent = 'REQUIRED';
+    } else {
+      const needsText = activeMode === 'multimodal' || activeMode === 'text-only';
+      const needsImg = activeMode === 'multimodal' || activeMode === 'image-only';
+      textEl.disabled = !needsText;
+      helper.textContent = needsText
+        ? 'Required for ' + activeMode.toUpperCase() + ' inference.'
+        : 'Disabled in IMAGE-ONLY mode.';
+      $('uploadReqBadge').textContent = needsImg ? 'REQUIRED' : 'NOT USED IN TEXT-ONLY';
+    }
+    updateCharCount();
+  }
+
+  function selectPipeline(pipeId) {
+    activePipe = pipeId;
+    const pipe = PIPELINES[pipeId];
+    clearMedia();
+    $('textInput').value = '';
+    $('analyzeErr').classList.remove('show');
+
+    document.querySelectorAll('.pipe-tab').forEach((tab) => {
+      const isAct = tab.dataset.pipe === pipeId;
+      tab.classList.toggle('active', isAct);
+      tab.setAttribute('aria-selected', String(isAct));
+    });
+
+    $('uploadLabel').firstElementChild.textContent = pipe.uploadLabel;
+    $('mediaFileInput').accept = pipe.accept;
+    $('dzTitle').innerHTML = pipe.dzTitle;
+    $('dzHint').textContent = pipe.dzHint;
+    $('textLabel').textContent = pipe.textLabel;
+    $('textInput').placeholder = pipe.textPlaceholder;
+    $('loadSampleBtn').textContent = pipe.sampleBtnText;
+    $('pipelineLegend').innerHTML = pipe.legendHtml + '<br><em>Architecture names shown here are unverified until confirmed against the trained checkpoints (GET /api/models).</em>';
+
+    $('modelSelect').innerHTML = pipe.models.map((m) =>
+      `<option value="${m.id}">${m.name}</option>`
+    ).join('');
+
+    activeMode = pipe.models[0].modes[0];
+    updateArchAndModes();
+  }
+
+  document.querySelectorAll('.pipe-tab').forEach((tab) => {
+    tab.addEventListener('click', () => selectPipeline(tab.dataset.pipe));
+  });
+
+  $('modelSelect').addEventListener('change', updateArchAndModes);
+
+  function updateCharCount() {
+    $('charCount').textContent = `${$('textInput').value.length} / 512 chars`;
+  }
+  $('textInput').addEventListener('input', updateCharCount);
+
+  // Advanced config drawer
+  $('advToggleBtn').addEventListener('click', () => {
+    const body = $('advBody');
+    const isOpen = body.classList.toggle('open');
+    $('advToggleBtn').setAttribute('aria-expanded', String(isOpen));
+    $('advChevron').textContent = isOpen ? '−' : '+';
+  });
+
+  $('overrideCalibChk').addEventListener('change', (e) => {
+    const on = e.target.checked;
+    $('cfgTemp').disabled = !on;
+    $('cfgConf').disabled = !on;
+    $('cfgEnt').disabled = !on;
+    if (!on) {
+      const m = getSelectedModel();
+      $('cfgTemp').value = m.defaultTemp;
+      $('cfgConf').value = m.defaultConf;
+      $('cfgEnt').value = m.defaultEnt;
+    }
+  });
+
+  /* File Upload & Drag-and-Drop */
+  function showAnalyzeError(msg) {
+    const box = $('analyzeErr');
+    box.textContent = msg;
+    box.classList.add('show');
+  }
+
+  function handleUploadedFile(file) {
+    if (!file) return;
+    $('analyzeErr').classList.remove('show');
+    const pipe = PIPELINES[activePipe];
+
+    if (pipe.mediaType === 'image') {
+      if (!/^image\/(jpeg|jpg|png)$/i.test(file.type)) {
+        showAnalyzeError('Invalid file type. Please upload a JPG, JPEG, or PNG image.');
+        return;
+      }
+      if (file.size > 15 * 1024 * 1024) {
+        showAnalyzeError('Image exceeds 15 MB limit.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        stopSampleCanvasAnim();
+        uploadedMedia = {
+          type: 'image',
+          src: reader.result,
+          name: file.name,
+          file,
+          size: file.size
+        };
+        $('imgPreview').src = reader.result;
+        $('imgPreview').hidden = false;
+        $('vidPreview').hidden = true;
+        $('vidSampleCanvas').hidden = true;
+        $('dzPlaceholder').hidden = true;
+        $('fileMeta').style.display = 'flex';
+        $('fileMetaName').textContent = file.name;
+        $('fileMetaInfo').textContent = `${(file.size / 1024).toFixed(1)} KB · IMAGE`;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      if (file.type !== 'video/mp4' && !file.name.toLowerCase().endsWith('.mp4')) {
+        showAnalyzeError('Invalid file type. FaceForensics++ requires an MP4 video.');
+        return;
+      }
+      if (file.size > 120 * 1024 * 1024) {
+        showAnalyzeError('Video exceeds 120 MB limit.');
+        return;
+      }
+      stopSampleCanvasAnim();
+      const url = URL.createObjectURL(file);
+      const vid = $('vidPreview');
+      vid.src = url;
+      vid.hidden = false;
+      $('imgPreview').hidden = true;
+      $('vidSampleCanvas').hidden = true;
+      $('dzPlaceholder').hidden = true;
+      uploadedMedia = {
+        type: 'video',
+        src: url,
+        name: file.name,
+        file,
+        size: file.size,
+        duration: 'N/A'
+      };
+      $('fileMeta').style.display = 'flex';
+      $('fileMetaName').textContent = file.name;
+      $('fileMetaInfo').textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB · MP4`;
+      vid.onloadedmetadata = () => {
+        const dur = isFinite(vid.duration) ? vid.duration.toFixed(1) + 's' : 'N/A';
+        if (uploadedMedia && uploadedMedia.src === url) uploadedMedia.duration = dur;
+        $('fileMetaInfo').textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB · ${dur} · MP4`;
+      };
+    }
+  }
+
+  $('mediaFileInput').addEventListener('change', (e) => {
+    handleUploadedFile(e.target.files[0]);
+  });
+
+  const dz = $('dropzone');
+  ['dragenter', 'dragover'].forEach((ev) => {
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dz.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach((ev) => {
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dz.classList.remove('dragover');
+    });
+  });
+  dz.addEventListener('drop', (e) => {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleUploadedFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  $('clearMediaBtn').addEventListener('click', clearMedia);
+
+  /* Procedural Sample Loaders (SVG + Canvas — zero external dependencies) */
+  function buildSampleSvg(title, accent, motif) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260">
+      <rect width="420" height="260" fill="#171717"/>
+      <rect x="14" y="14" width="392" height="232" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 6"/>
+      ${motif}
+      <rect x="24" y="204" width="372" height="32" fill="#0d0d0d" stroke="#f1ede4" stroke-width="2"/>
+      <text x="36" y="225" fill="#d8ff00" font-family="monospace" font-size="13" font-weight="bold">${title}</text>
+    </svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  function startSampleVideoCanvas() {
+    const canvas = $('vidSampleCanvas');
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    function draw() {
+      frame++;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(216,255,0,0.12)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 24) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 24) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Face silhouette with subtle oscillating seam
+      const cx = 210 + Math.sin(frame * 0.05) * 6;
+      const cy = 112;
+      ctx.fillStyle = '#f1ede4';
+      ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ff2b2b';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cx - 56, cy - 56, 112, 112);
+
+      // Eyes & mouth
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(cx - 20, cy - 12, 10, 10);
+      ctx.fillRect(cx + 10, cy - 12, 10, 10);
+      ctx.fillRect(cx - 18, cy + 16, 36, 6);
+
+      // Scanline
+      const scanY = (frame * 3) % canvas.height;
+      ctx.fillStyle = '#d8ff00';
+      ctx.fillRect(0, scanY, canvas.width, 3);
+
+      // HUD
+      ctx.fillStyle = '#d8ff00';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText(`SAMPLE FORENSIC CLIP // FRAME ${(frame % 240).toString().padStart(3, '0')}/240`, 14, 22);
+      ctx.fillStyle = '#ff2b2b';
+      ctx.fillText('FACE CROP + SEAM MARGIN', 14, 226);
+
+      sampleAnimId = requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  $('loadSampleBtn').addEventListener('click', () => {
+    $('analyzeErr').classList.remove('show');
+    if (activePipe === 'fakeddit') {
+      const src = buildSampleSvg(
+        'SAMPLE POST // FAKEDDIT STATIC PREVIEW',
+        '#ff2b2b',
+        '<circle cx="210" cy="108" r="52" fill="#f1ede4" stroke="#0d0d0d" stroke-width="4"/><circle cx="192" cy="98" r="6" fill="#0d0d0d"/><circle cx="228" cy="98" r="6" fill="#0d0d0d"/><path d="M188 126 Q210 112 232 126" stroke="#ff2b2b" stroke-width="5" fill="none"/><rect x="130" y="160" width="160" height="36" fill="#ff2b2b"/>'
+      );
+      uploadedMedia = { type: 'image', src, name: 'sample_fakeddit_post.png', size: 84200 };
+      $('imgPreview').src = src;
+      $('imgPreview').hidden = false;
+      $('vidPreview').hidden = true;
+      $('vidSampleCanvas').hidden = true;
+      $('dzPlaceholder').hidden = true;
+      $('fileMeta').style.display = 'flex';
+      $('fileMetaName').textContent = uploadedMedia.name;
+      $('fileMetaInfo').textContent = '82.2 KB · SAMPLE IMAGE';
+      if (!$('textInput').disabled) {
+        $('textInput').value = 'BREAKING: Leaked secret footage exposes mayor announcing urgent citywide ban overnight!';
+        updateCharCount();
+      }
+      showToast('Loaded Fakeddit sample post');
+    } else if (activePipe === 'faceforensics') {
+      stopSampleCanvasAnim();
+      $('imgPreview').hidden = true;
+      $('vidPreview').hidden = true;
+      $('dzPlaceholder').hidden = true;
+      $('vidSampleCanvas').hidden = false;
+      startSampleVideoCanvas();
+      uploadedMedia = {
+        type: 'canvas',
+        src: null,
+        name: 'sample_ffpp_clip_c23.mp4',
+        size: 4820000,
+        duration: '8.0s'
+      };
+      $('fileMeta').style.display = 'flex';
+      $('fileMetaName').textContent = uploadedMedia.name;
+      $('fileMetaInfo').textContent = '4.60 MB · 8.0s · PROCEDURAL SAMPLE CLIP';
+      if (!$('textInput').disabled) {
+        $('textInput').value = 'Spokesperson delivers press briefing inside conference hall.';
+        updateCharCount();
+      }
+      showToast('Loaded FaceForensics++ forensic clip');
+    } else {
+      const src = buildSampleSvg(
+        'SAMPLE PREMISE // SNLI-VE STATIC PREVIEW',
+        '#00e5ff',
+        '<rect x="70" y="64" width="110" height="110" fill="#d8ff00" stroke="#0d0d0d" stroke-width="4"/><circle cx="285" cy="118" r="52" fill="#00e5ff" stroke="#0d0d0d" stroke-width="4"/><line x1="180" y1="118" x2="233" y2="118" stroke="#f1ede4" stroke-width="5" stroke-dasharray="6 4"/>'
+      );
+      uploadedMedia = { type: 'image', src, name: 'sample_snlive_premise.jpg', size: 61500 };
+      $('imgPreview').src = src;
+      $('imgPreview').hidden = false;
+      $('vidPreview').hidden = true;
+      $('vidSampleCanvas').hidden = true;
+      $('dzPlaceholder').hidden = true;
+      $('fileMeta').style.display = 'flex';
+      $('fileMetaName').textContent = uploadedMedia.name;
+      $('fileMetaInfo').textContent = '60.1 KB · SAMPLE PREMISE';
+      if (!$('textInput').disabled) {
+        $('textInput').value = 'A crowded snow-covered mountain ski resort during a midnight blizzard.';
+        updateCharCount();
+      }
+      showToast('Loaded SNLI-VE sample pair');
+    }
+  });
+
+  /* ==========================================================================
+     DETERMINISTIC STATIC PREVIEW INFERENCE ENGINE
+     ========================================================================== */
+  function hashStr(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function shannonEntropy(probs) {
+    let h = 0;
+    probs.forEach((p) => {
+      if (p > 1e-9) h -= p * Math.log(p);
+    });
+    return h;
+  }
+
+  /* Backend response -> internal result. Nothing is generated client-side:
+     fields the backend does not return stay empty and the UI hides them. */
+  function adaptApiResult(api, pipe, model, text, elapsed, xaiOn) {
+    const nli = pipe.id === 'snlive';
+    const scores = api.scores || {};
+    const conf = api.confidence && typeof api.confidence === 'object' ? api.confidence.value : api.confidence;
+    const ev = api.evidence || {};
+    const xai = { enabled: xaiOn, tabs: [] };
+    if (xaiOn && Array.isArray(ev.text_attributions) && ev.text_attributions.length) {
+      xai.tabs.push('text'); xai.textAttributions = ev.text_attributions;
+    }
+    const binary = !nli && 'REAL' in scores && 'FAKE' in scores;
+    return {
+      analysis_id: api.analysis_id || 'AN-' + Date.now().toString(36).toUpperCase(),
+      dataset: pipe.id, dataset_name: pipe.name, mode: activeMode,
+      status: 'completed', is_static_preview: false,
+      input: {
+        filename: uploadedMedia ? uploadedMedia.name : '(text-only input)',
+        mediaType: uploadedMedia ? uploadedMedia.type : 'none',
+        mediaSrc: uploadedMedia && uploadedMedia.type === 'image' ? uploadedMedia.src : null,
+        text
+      },
+      model: {
+        model_id: model.id,
+        model_name: api.model_name || model.id,
+        fusion_architecture: api.architecture || 'not reported by backend'
+      },
+      prediction: {
+        label: api.prediction,
+        nliClass: nli ? api.prediction : undefined,
+        confidence: conf == null ? null : conf,
+        isBinary: binary,
+        classProbs: binary ? { REAL: scores.REAL, FAKE: scores.FAKE } : undefined,
+        nliProbs: scores,
+        mismatchCategory: api.mismatch_category || (nli && api.prediction ? String(api.prediction).toUpperCase() : 'N/A'),
+        manipulationFamily: api.manipulation_family
+      },
+      calibration: {
+        temperature: null,
+        routedUncertain: !!api.abstained,
+        abstentionReason: api.abstention_reason || ''
+      },
+      modalities: api.modalities || {},
+      warnings: api.warnings || [],
+      explanation: { summary: api.summary || 'The backend did not return a natural-language explanation.', xai },
+      metadata: { processing_time: Number(api.processing_time != null ? api.processing_time : elapsed), timestamp: new Date().toISOString() }
+    };
+  }
+
+  /* Run: POST to the real inference API. No simulated fallback. */
+  $('runAnalysisBtn').addEventListener('click', async () => {
+    if (isRunning) return;
+    $('analyzeErr').classList.remove('show');
+
+    const pipe = PIPELINES[activePipe];
+    const model = getSelectedModel();
+    const text = $('textInput').value.trim();
+    const needsMedia = activeMode !== 'text-only';
+    const needsText = pipe.id !== 'faceforensics' && activeMode !== 'image-only';
+
+    if (needsMedia && !uploadedMedia) {
+      showAnalyzeError(`Please upload a valid ${pipe.mediaType.toUpperCase()} file before running.`);
+      return;
+    }
+    if (needsMedia && !uploadedMedia.file) {
+      showAnalyzeError('Built-in sample inputs are demo-only and cannot be sent to the backend. Upload a real file.');
+      return;
+    }
+    if (needsText && !text) {
+      showAnalyzeError('Please enter the required text / caption / hypothesis before running.');
+      return;
+    }
+
+    const base = $('apiBaseInput').value.trim().replace(/\/+$/, '');
+    const xaiOn = $('cfgXaiChk').checked;
+    const fd = new FormData();
+    if (uploadedMedia && uploadedMedia.file) fd.append('file', uploadedMedia.file);
+    if (text) fd.append(pipe.id === 'snlive' ? 'hypothesis' : 'text', text);
+    fd.append('model_id', model.id);
+    fd.append('mode', activeMode);
+    fd.append('xai', String(xaiOn));
+    fd.append('temperature', $('cfgTemp').value);
+    fd.append('confidence_threshold', $('cfgConf').value);
+    fd.append('entropy_threshold', $('cfgEnt').value);
+    if (pipe.id === 'snlive') fd.append('mismatch_heuristic', String($('snliHeuristicChk').checked));
+
+    isRunning = true;
+    $('runAnalysisBtn').disabled = true;
+    const term = $('terminalSteps');
+    term.innerHTML = `<div>&#9654; Uploading input to ${escapeHtml(base)} ...</div><div>&#9654; Waiting for the ${escapeHtml(pipe.name)} pipeline response...</div>`;
+    term.classList.add('show');
+
+    const t0 = performance.now();
+    try {
+      const resp = await fetch(`${base}/api/predict/${pipe.id}`, { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const api = await resp.json();
+      if (!api || api.prediction == null) throw new Error('response has no "prediction" field');
+      const result = adaptApiResult(api, pipe, model, text, ((performance.now() - t0) / 1000).toFixed(2), xaiOn);
+      currentResult = result;
+      historyList.unshift(result);
+      saveHistory();
+      renderResultView(result);
+      navigateTo('result');
+    } catch (err) {
+      showAnalyzeError(`Backend request failed (${err.message}). Check the API URL and that ${base}/api/predict/${pipe.id} is running. No prediction was produced.`);
+    } finally {
+      isRunning = false;
+      $('runAnalysisBtn').disabled = false;
+      term.classList.remove('show');
+    }
+  });
+
+  /* ==========================================================================
+     RENDER UNIFIED PREDICTION RESULTS & XAI VIEW
+     ========================================================================== */
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function renderResultView(res) {
+    const p = res.prediction;
+    const c = res.calibration;
+    const m = res.model;
+    const confPct = p.confidence != null ? (p.confidence * 100).toFixed(1) : 'n/a';
+    const isNli = res.dataset === 'snlive';
+    const shownLabel = isNli ? p.nliClass : p.label;
+    const bannerCls = isNli ? 'UNCERTAIN' : p.label;
+
+    // Build Probabilities HTML (strictly respecting Binary vs 3-way SNLI-VE)
+    let probsHtml = '';
+    if (p.isBinary) {
+      const pRealPct = (p.classProbs.REAL * 100).toFixed(1);
+      const pFakePct = (p.classProbs.FAKE * 100).toFixed(1);
+      probsHtml = `
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+          Binary model probabilities (no fabricated 3rd class probability). Post-calibration abstention is evaluated separately below.
+        </p>
+        <div class="prob-row">
+          <div class="prob-head"><span>P(REAL)</span><span>${pRealPct}%</span></div>
+          <div class="prob-bar"><div class="prob-fill p-real" data-w="${pRealPct}"></div></div>
+        </div>
+        <div class="prob-row">
+          <div class="prob-head"><span>P(FAKE)</span><span>${pFakePct}%</span></div>
+          <div class="prob-bar"><div class="prob-fill p-fake" data-w="${pFakePct}"></div></div>
+        </div>
+        <div style="margin-top:12px;padding:10px;border:3px solid var(--ink);background:var(--bg);font-size:12px;">
+          <strong>POST-CALIBRATION DECISION:</strong>
+          ${c.routedUncertain
+            ? `<span class="pill pill-UNCERTAIN">ROUTED TO UNCERTAIN</span><div style="margin-top:6px;">${escapeHtml(c.abstentionReason)}</div>`
+            : `<span class="pill pill-${p.label}">ACCEPTED (${p.label})</span> — Confidence and entropy within calibrated bounds.`}
+        </div>
+      `;
+    } else {
+      const ePct = ((p.nliProbs.Entailment ?? p.nliProbs.entailment ?? 0) * 100).toFixed(1);
+      const nPct = ((p.nliProbs.Neutral ?? p.nliProbs.neutral ?? 0) * 100).toFixed(1);
+      const cPct = ((p.nliProbs.Contradiction ?? p.nliProbs.contradiction ?? 0) * 100).toFixed(1);
+      probsHtml = `
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+          Original 3-way SNLI-VE NLI probabilities kept separate from user-facing verdict mapping.
+        </p>
+        <div class="prob-row">
+          <div class="prob-head"><span>Entailment (&rarr; REAL)</span><span>${ePct}%</span></div>
+          <div class="prob-bar"><div class="prob-fill p-real" data-w="${ePct}"></div></div>
+        </div>
+        <div class="prob-row">
+          <div class="prob-head"><span>Neutral (&rarr; UNCERTAIN)</span><span>${nPct}%</span></div>
+          <div class="prob-bar"><div class="prob-fill p-unc" data-w="${nPct}"></div></div>
+        </div>
+        <div class="prob-row">
+          <div class="prob-head"><span>Contradiction (&rarr; FAKE)</span><span>${cPct}%</span></div>
+          <div class="prob-bar"><div class="prob-fill p-fake" data-w="${cPct}"></div></div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;">
+          <span class="tag" style="margin:0;">NLI CLASS: ${p.nliClass.toUpperCase()}</span>
+          <span class="tag cyan" style="margin:0;">MISMATCH CAT: ${p.mismatchCategory}</span>
+        </div>
+      `;
+    }
+
+    // Build Modality Cards HTML
+    const modEntries = [
+      { key: 'text', title: 'Text Modality' },
+      { key: 'image', title: 'Image Modality' },
+      { key: 'video', title: 'Video Modality' },
+      { key: 'crossModal', title: 'Cross-Modal Consistency' },
+      { key: 'fusion', title: 'Final Fused Output' }
+    ].filter((item) => res.modalities[item.key]);
+
+    const modHtml = modEntries.map((item) => {
+      const d = res.modalities[item.key];
+      const badge = d.label
+        ? `<span class="pill pill-${d.label}">${d.label}</span>`
+        : `<span class="pill pill-WAIT">${(d.score * 100).toFixed(1)}% SIGNAL</span>`;
+      return `
+        <div style="border:3px solid var(--ink);background:var(--bg);padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
+            <strong style="font-size:12px;text-transform:uppercase;">${item.title}</strong>
+            ${badge}
+          </div>
+          <p style="font-size:12px;">${escapeHtml(d.note)}</p>
+        </div>
+      `;
+    }).join('');
+
+    // Build XAI Section HTML
+    const xai = res.explanation.xai;
+    let xaiHtml = '';
+    if (!xai.enabled) {
+      xaiHtml = `<div class="card"><p style="font-size:13px;">XAI artifact generation was disabled in the Advanced Inference Configuration for this run.</p></div>`;
+    } else if (!xai.tabs.length) {
+      xaiHtml = `<div class="card"><p style="font-size:13px;">No explanation artifacts were returned by the backend for this run. Only explanations generated by the model pipeline are shown.</p></div>`;
+    } else {
+      const tabLabels = {
+        text: 'Text XAI (LIME / SHAP)',
+        image: 'Image XAI (Grad-CAM / ViT)',
+        video: 'Video XAI (Frame Forensics)',
+        cross: 'Cross-Modal Attention'
+      };
+
+      const tabsNav = xai.tabs.map((t, idx) =>
+        `<button type="button" class="xai-tab ${idx === 0 ? 'active' : ''}" data-xai-tab="${t}">${tabLabels[t]}</button>`
+      ).join('');
+
+      let panels = '';
+
+      if (xai.tabs.includes('text')) {
+        const toks = xai.textAttributions;
+        const highlighted = toks.map((t) => {
+          if (t.weight >= 0.25) return `<span class="tok-pos" title="Attribution: +${t.weight}">${escapeHtml(t.token)}</span>`;
+          if (t.weight <= -0.15) return `<span class="tok-neg" title="Attribution: ${t.weight}">${escapeHtml(t.token)}</span>`;
+          return `<span>${escapeHtml(t.token)} </span>`;
+        }).join(' ');
+
+        const topToks = [...toks].sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight)).slice(0, 6);
+        const bars = topToks.map((t) => {
+          const pct = Math.min(100, Math.abs(t.weight) * 100).toFixed(0);
+          const isPos = t.weight >= 0;
+          return `
+            <div class="prob-row" style="margin-bottom:8px;">
+              <div class="prob-head">
+                <span>"${escapeHtml(t.token)}"</span>
+                <span>${isPos ? '+' : ''}${t.weight} (${isPos ? 'toward FAKE/CONTRADICT' : 'toward REAL/ENTAIL'})</span>
+              </div>
+              <div class="prob-bar" style="height:16px;">
+                <div class="prob-fill ${isPos ? 'p-fake' : 'p-real'}" style="width:${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        panels += `
+          <div class="xai-panel ${xai.tabs[0] === 'text' ? 'active' : ''}" data-xai-panel="text">
+            <p style="font-size:12px;margin-bottom:10px;">Token-level attribution highlights (Red = pushes toward FAKE/Contradiction, Green = pushes toward REAL/Entailment).</p>
+            <div class="tok-highlight">${highlighted}</div>
+            <h4 style="font-size:12px;text-transform:uppercase;margin-bottom:10px;">Top Contributing Tokens</h4>
+            ${bars}
+          </div>
+        `;
+      }
+
+      if (xai.tabs.includes('image')) {
+        const hm = xai.imageMap;
+        const gradStyle = `background: radial-gradient(circle at ${hm.hotspot1.x}% ${hm.hotspot1.y}%, rgba(255,43,43,0.92), rgba(255,210,0,0.45) 26%, transparent 48%), radial-gradient(circle at ${hm.hotspot2.x}% ${hm.hotspot2.y}%, rgba(0,229,255,0.75), transparent 36%);`;
+        panels += `
+          <div class="xai-panel ${xai.tabs[0] === 'image' ? 'active' : ''}" data-xai-panel="image">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+              <span class="tag acid" style="margin:0;">METHOD: ${hm.method}</span>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="btn sm alt img-xai-mode" data-imode="original">Original</button>
+                <button type="button" class="btn sm alt img-xai-mode" data-imode="heatmap">Heatmap</button>
+                <button type="button" class="btn sm img-xai-mode" data-imode="overlay">Overlay</button>
+                <label style="font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;">
+                  OPACITY
+                  <input type="range" id="hmOpacity" min="0" max="100" value="75">
+                </label>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <p style="font-size:11px;font-weight:700;margin-bottom:6px;">ORIGINAL INPUT</p>
+                <div class="img-xai-stage"><img src="${res.input.mediaSrc}" alt="Original input"></div>
+              </div>
+              <div>
+                <p style="font-size:11px;font-weight:700;margin-bottom:6px;">EXPLAINABILITY VIEW</p>
+                <div class="img-xai-stage" id="xaiStageRight">
+                  <img id="xaiBaseImg" src="${res.input.mediaSrc}" alt="XAI visual overlay">
+                  <div class="heatmap-layer" id="xaiHeatLayer" style="${gradStyle} opacity:0.75;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (xai.tabs.includes('video')) {
+        const vf = xai.videoFrames;
+        const frameCards = vf.frames.map((f, idx) => `
+          <div class="frame-card ${idx === 0 ? 'selected' : ''}" data-frame-idx="${idx}">
+            <div class="frame-thumb">
+              <span>FRAME #${f.index}</span>
+              <div style="position:absolute;inset:0;background:radial-gradient(circle at ${f.hotspotX}% ${f.hotspotY}%, rgba(255,43,43,0.72), transparent 45%);"></div>
+            </div>
+            <div style="font-size:11px;font-weight:700;display:flex;justify-content:space-between;">
+              <span>t=${f.timestamp}</span>
+              <span>${(f.fakeProb * 100).toFixed(0)}%</span>
+            </div>
+            <div class="prob-bar" style="height:10px;margin-top:4px;">
+              <div class="prob-fill ${f.fakeProb >= 0.5 ? 'p-fake' : 'p-real'}" style="width:${(f.fakeProb * 100).toFixed(0)}%"></div>
+            </div>
+          </div>
+        `).join('');
+
+        panels += `
+          <div class="xai-panel ${xai.tabs[0] === 'video' ? 'active' : ''}" data-xai-panel="video">
+            <div class="arch-badges" style="margin-top:0;margin-bottom:14px;">
+              <span>ANALYZED FRAMES: ${vf.totalAnalyzed}</span>
+              <span>SAMPLING: ${vf.samplingRate}</span>
+              <span>FACE CROP: ${vf.faceCrop}</span>
+            </div>
+            <div id="frameInspector" style="border:3px solid var(--ink);background:var(--bg);padding:14px;margin-bottom:14px;">
+              <strong style="font-size:12px;">INSPECTING FRAME #${vf.frames[0].index} (t=${vf.frames[0].timestamp})</strong> —
+              Frame Prediction: <span class="pill ${vf.frames[0].fakeProb >= 0.5 ? 'pill-FAKE' : 'pill-REAL'}">${vf.frames[0].label}</span>
+              (${(vf.frames[0].fakeProb * 100).toFixed(1)}% manipulation score). Click any frame below to inspect saliency.
+            </div>
+            <div class="frame-strip">${frameCards}</div>
+          </div>
+        `;
+      }
+
+      if (xai.tabs.includes('cross')) {
+        const cm = xai.crossModal;
+        const headCols = cm.regions.map((r) => `<th>${r}</th>`).join('');
+        const rows = cm.tokens.map((tk, rIdx) => {
+          const cells = cm.scores[rIdx].map((sc) => {
+            const bg = sc > 0.68 ? 'var(--red);color:#fff;' : (sc > 0.42 ? 'var(--acid);color:#000;' : 'var(--bg);color:var(--ink);');
+            return `<td style="background:${bg}font-weight:700;">${sc.toFixed(2)}</td>`;
+          }).join('');
+          return `<tr><th>"${escapeHtml(tk)}"</th>${cells}</tr>`;
+        }).join('');
+
+        panels += `
+          <div class="xai-panel ${xai.tabs[0] === 'cross' ? 'active' : ''}" data-xai-panel="cross">
+            <p style="font-size:12px;margin-bottom:12px;">Cross-modal attention weights aligning input text tokens with visual regions (higher values indicate stronger alignment or focal conflict).</p>
+            <div style="overflow-x:auto;">
+              <table class="matrix-table">
+                <thead><tr><th>Token \\ Visual Region</th>${headCols}</tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      xaiHtml = `
+        <div class="card">
+          <div class="xai-tabs">${tabsNav}</div>
+          ${panels}
+        </div>
+      `;
+    }
+
+    $('resultContainer').innerHTML = `
+      <div class="banner-static no-print">
+        <span>BACKEND RESULT &middot; ${escapeHtml(m.model_name)}${(res.warnings || []).length ? ' &middot; ' + res.warnings.map(escapeHtml).join(' / ') : ''}</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn sm alt" id="exportJsonBtn" type="button">Download JSON</button>
+          <button class="btn sm alt" id="exportPdfBtn" type="button">Print / Save PDF</button>
+          <button class="btn sm" id="runAnotherBtn" type="button">Analyze Another &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Primary Verdict Banner -->
+      <div class="verdict-banner v-${bannerCls}">
+        <div>
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">FINAL CALIBRATED VERDICT</div>
+          <div class="disp verdict-word">${shownLabel}</div>
+          ${isNli ? '<div style="font-size:11px;font-weight:700;margin-top:8px;max-width:420px;">IMAGE-SENTENCE RELATION (NLI) &mdash; NOT A DEEPFAKE OR REAL/FAKE LABEL.</div>' : ''}
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;">CONFIDENCE</div>
+          <div class="disp" style="font-size:clamp(36px,6vw,64px);">${confPct}${p.confidence != null ? '%' : ''}</div>
+          ${p.manipulationFamily ? `<div style="margin-top:6px;font-size:12px;font-weight:700;">FAMILY: ${p.manipulationFamily.toUpperCase()}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Metadata Tiles -->
+      <div class="verdict-meta">
+        <div class="meta-tile"><small>Analysis ID</small><b>${res.analysis_id}</b></div>
+        <div class="meta-tile"><small>Dataset Pipeline</small><b>${res.dataset_name}</b></div>
+        <div class="meta-tile"><small>Model Checkpoint</small><b>${escapeHtml(m.model_name)}</b></div>
+        <div class="meta-tile"><small>Fusion Architecture</small><b>${escapeHtml(m.fusion_architecture)}</b></div>
+        <div class="meta-tile"><small>Processing Time</small><b>${res.metadata.processing_time}s</b></div>
+        <div class="meta-tile"><small>Timestamp</small><b>${new Date(res.metadata.timestamp).toLocaleString()}</b></div>
+      </div>
+
+      <!-- Probabilities & Calibration -->
+      <div class="grid-2" style="margin-bottom:24px;">
+        <div class="card">
+          <h3 class="disp" style="font-size:24px;margin-bottom:14px;">Class Probabilities</h3>
+          ${probsHtml}
+        </div>
+        <div class="card">
+          <h3 class="disp" style="font-size:24px;margin-bottom:14px;">Calibration &amp; Uncertainty</h3>
+          <div class="verdict-meta" style="margin-bottom:12px;">
+            ${c.temperature != null ? `
+            <div class="meta-tile"><small>Temperature (T)</small><b>${c.temperature}</b></div>
+            <div class="meta-tile"><small>Confidence Thresh</small><b>${(c.confidenceThreshold * 100).toFixed(0)}%</b></div>
+            <div class="meta-tile"><small>Entropy Thresh</small><b>${c.entropyThreshold}</b></div>
+            <div class="meta-tile"><small>Predictive Entropy</small><b>${c.entropy.toFixed(4)}</b></div>
+            <div class="meta-tile"><small>Norm. Shannon Entropy</small><b>${c.normalizedEntropy.toFixed(4)}</b></div>
+            ` : ''}
+            <div class="meta-tile"><small>Abstention Status</small><b>${c.routedUncertain ? 'ROUTED UNCERTAIN' : 'DIRECT VERDICT'}</b></div>
+          </div>
+          <div style="border:3px solid var(--ink);background:var(--bg);padding:12px;font-size:12px;">
+            <strong>NATURAL LANGUAGE EXPLANATION:</strong>
+            <p style="margin-top:6px;">${escapeHtml(res.explanation.summary)}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modality Contribution Breakdown -->
+      ${modHtml ? `<div class="card" style="margin-bottom:24px;">
+        <h3 class="disp" style="font-size:24px;margin-bottom:14px;">Modality Contributions</h3>
+        <div class="grid-3" style="gap:14px;">${modHtml}</div>
+      </div>` : ''}
+
+      <!-- Mandatory Explainable AI (XAI) Module -->
+      <div style="margin-bottom:24px;">
+        <span class="tag acid">Explainable AI (XAI) Evidence</span>
+        <h3 class="disp" style="font-size:clamp(28px,5vw,44px);margin-bottom:14px;">Why the model decided this.</h3>
+        ${xaiHtml}
+      </div>
+    `;
+
+    // Animate probability bars
+    requestAnimationFrame(() => {
+      $('resultContainer').querySelectorAll('.prob-fill[data-w]').forEach((el) => {
+        el.style.width = el.dataset.w + '%';
+      });
+    });
+
+    // Wire XAI Tabs
+    $('resultContainer').querySelectorAll('.xai-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const key = tab.dataset.xaiTab;
+        $('resultContainer').querySelectorAll('.xai-tab').forEach((t) => t.classList.toggle('active', t === tab));
+        $('resultContainer').querySelectorAll('.xai-panel').forEach((pEl) => pEl.classList.toggle('active', pEl.dataset.xaiPanel === key));
+      });
+    });
+
+    // Wire Image XAI Controls
+    const hmOpacity = $('hmOpacity');
+    const heatLayer = $('xaiHeatLayer');
+    const baseImg = $('xaiBaseImg');
+    if (hmOpacity && heatLayer && baseImg) {
+      hmOpacity.addEventListener('input', () => {
+        heatLayer.style.opacity = (hmOpacity.value / 100).toFixed(2);
+      });
+      $('resultContainer').querySelectorAll('.img-xai-mode').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.imode;
+          $('resultContainer').querySelectorAll('.img-xai-mode').forEach((b) => b.classList.add('alt'));
+          btn.classList.remove('alt');
+          if (mode === 'original') {
+            baseImg.style.opacity = '1';
+            heatLayer.style.display = 'none';
+          } else if (mode === 'heatmap') {
+            baseImg.style.opacity = '0.12';
+            heatLayer.style.display = 'block';
+            heatLayer.style.opacity = '1';
+          } else {
+            baseImg.style.opacity = '1';
+            heatLayer.style.display = 'block';
+            heatLayer.style.opacity = (hmOpacity.value / 100).toFixed(2);
+          }
+        });
+      });
+    }
+
+    // Wire Video Frame Inspector
+    if (xai.videoFrames) {
+      $('resultContainer').querySelectorAll('.frame-card').forEach((fc) => {
+        fc.addEventListener('click', () => {
+          const idx = Number(fc.dataset.frameIdx);
+          const f = xai.videoFrames.frames[idx];
+          $('resultContainer').querySelectorAll('.frame-card').forEach((cEl) => cEl.classList.remove('selected'));
+          fc.classList.add('selected');
+          $('frameInspector').innerHTML = `
+            <strong style="font-size:12px;">INSPECTING FRAME #${f.index} (t=${f.timestamp})</strong> —
+            Frame Prediction: <span class="pill ${f.fakeProb >= 0.5 ? 'pill-FAKE' : 'pill-REAL'}">${f.label}</span>
+            (${(f.fakeProb * 100).toFixed(1)}% manipulation score). Saliency focal point centered near facial blending boundary (${f.hotspotX}%, ${f.hotspotY}%).
+          `;
+        });
+      });
+    }
+
+    // Wire Export & Navigation Buttons
+    $('exportJsonBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${res.analysis_id}_report.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${res.analysis_id}_report.json`);
+    });
+
+    $('exportPdfBtn').addEventListener('click', () => {
+      window.print();
+    });
+
+    $('runAnotherBtn').addEventListener('click', () => {
+      navigateTo('analyze');
+    });
+  }
+
+  /* ==========================================================================
+     DASHBOARD VIEW
+     ========================================================================== */
+  function renderDashboard() {
+    const total = historyList.length;
+    const realCount = historyList.filter((x) => x.prediction.label === 'REAL').length;
+    const fakeCount = historyList.filter((x) => x.prediction.label === 'FAKE').length;
+    const uncCount = historyList.filter((x) => x.prediction.label === 'UNCERTAIN').length;
+
+    const statsHtml = `
+      <div class="stats-grid">
+        <div class="stat-card"><small style="font-weight:700;">TOTAL ANALYSES</small><div class="stat-val">${total}</div><small class="muted">Session / API</small></div>
+        <div class="stat-card s-real"><small style="font-weight:700;">REAL VERDICTS</small><div class="stat-val">${realCount}</div><small>${total ? ((realCount / total) * 100).toFixed(0) : 0}%</small></div>
+        <div class="stat-card s-fake"><small style="font-weight:700;">FAKE VERDICTS</small><div class="stat-val">${fakeCount}</div><small>${total ? ((fakeCount / total) * 100).toFixed(0) : 0}%</small></div>
+        <div class="stat-card s-unc"><small style="font-weight:700;">UNCERTAIN</small><div class="stat-val">${uncCount}</div><small>${total ? ((uncCount / total) * 100).toFixed(0) : 0}%</small></div>
+        <div class="stat-card"><small style="font-weight:700;">DATASETS</small><div class="stat-val">3</div><small class="muted">Fakeddit · FF++ · SNLI-VE</small></div>
+        <div class="stat-card"><small style="font-weight:700;">BENCHMARK API</small><div class="stat-val" style="font-size:24px;padding-top:10px;">${benchmarkState.connected ? 'LIVE' : 'OFFLINE'}</div><small class="muted">GET /api/benchmark</small></div>
+      </div>
+    `;
+
+    if (total === 0) {
+      $('dashboardContent').innerHTML = statsHtml + `
+        <div class="empty-state">
+          <span class="tag acid">EMPTY STATE</span>
+          <h3 class="disp" style="font-size:clamp(26px,5vw,42px);margin-bottom:10px;">No Analyses Recorded Yet</h3>
+          <p style="max-width:540px;margin:0 auto 20px;font-size:13px;">
+            Run your first detection in the Analyze Workbench or connect the live backend API (<code>GET /api/history</code> &amp; <code>GET /api/benchmark</code>) to populate live telemetry.
+          </p>
+          <button class="btn" id="dashGoAnalyze" type="button">Run First Analysis &rarr;</button>
+        </div>
+      `;
+      $('dashGoAnalyze').addEventListener('click', () => navigateTo('analyze'));
+      return;
+    }
+
+    const rPct = ((realCount / total) * 100).toFixed(1);
+    const fPct = ((fakeCount / total) * 100).toFixed(1);
+    const uPct = ((uncCount / total) * 100).toFixed(1);
+
+    const recentRows = historyList.slice(0, 5).map((item) => `
+      <tr style="cursor:pointer;" data-open-id="${item.analysis_id}">
+        <td><strong>${item.analysis_id}</strong></td>
+        <td>${item.dataset_name}</td>
+        <td>${escapeHtml(item.input.filename)}</td>
+        <td><span class="pill pill-${item.prediction.label}">${item.prediction.label}</span></td>
+        <td>${(item.prediction.confidence * 100).toFixed(1)}%</td>
+      </tr>
+    `).join('');
+
+    $('dashboardContent').innerHTML = statsHtml + `
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="disp" style="font-size:24px;margin-bottom:14px;">Prediction Distribution</h3>
+          <div class="prob-row">
+            <div class="prob-head"><span>REAL (${realCount})</span><span>${rPct}%</span></div>
+            <div class="prob-bar"><div class="prob-fill p-real" style="width:${rPct}%"></div></div>
+          </div>
+          <div class="prob-row">
+            <div class="prob-head"><span>FAKE (${fakeCount})</span><span>${fPct}%</span></div>
+            <div class="prob-bar"><div class="prob-fill p-fake" style="width:${fPct}%"></div></div>
+          </div>
+          <div class="prob-row">
+            <div class="prob-head"><span>UNCERTAIN (${uncCount})</span><span>${uPct}%</span></div>
+            <div class="prob-bar"><div class="prob-fill p-unc" style="width:${uPct}%"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 class="disp" style="font-size:24px;">Recent Activity</h3>
+            <button class="btn sm alt" id="dashViewAllHist" type="button">Full History</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="brut" style="font-size:12px;">
+              <thead><tr><th>ID</th><th>Dataset</th><th>Input</th><th>Verdict</th><th>Conf</th></tr></thead>
+              <tbody>${recentRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('dashViewAllHist').addEventListener('click', () => navigateTo('history'));
+    $('dashboardContent').querySelectorAll('[data-open-id]').forEach((tr) => {
+      tr.addEventListener('click', () => {
+        const found = historyList.find((x) => x.analysis_id === tr.dataset.openId);
+        if (found) {
+          currentResult = found;
+          renderResultView(found);
+          navigateTo('result');
+        }
+      });
+    });
+  }
+
+  /* ==========================================================================
+     MODEL LEADERBOARD VIEW (SORTABLE, STRICT STATUSES, ZERO FABRICATED SCORES)
+     ========================================================================== */
+  function formatMetric(val) {
+    if (val === null || val === undefined || !Number.isFinite(val)) return '&mdash;';
+    return val <= 1 ? (val * 100).toFixed(2) + '%' : val.toFixed(4);
+  }
+
+  function renderLeaderboard() {
+    const meta = LEADERBOARD_META[activeLbTab];
+    $('lbMetaBar').innerHTML = meta.badges.map((b) => `<span>${b}</span>`).join('');
+    $('lbFootnote').innerHTML = meta.footnoteHtml;
+
+    const rows = [...LEADERBOARD_DATA[activeLbTab]];
+    const numericCols = ['accuracy', 'precision', 'recall', 'macro_f1', 'roc_auc'];
+
+    if (lbSort.col) {
+      rows.sort((a, b) => {
+        if (numericCols.includes(lbSort.col)) {
+          const av = a.metrics[lbSort.col];
+          const bv = b.metrics[lbSort.col];
+          // Always push missing ("—") values to the bottom when sorting numbers
+          if (av === null && bv === null) return 0;
+          if (av === null) return 1;
+          if (bv === null) return -1;
+          return lbSort.asc ? av - bv : bv - av;
+        }
+        const av = String(a[lbSort.col] || '').toLowerCase();
+        const bv = String(b[lbSort.col] || '').toLowerCase();
+        return lbSort.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+    }
+
+    const arrow = (col) => lbSort.col === col ? (lbSort.asc ? ' ▲' : ' ▼') : '';
+
+    $('leaderboardTableWrap').innerHTML = `
+      <table class="brut">
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="name">Configuration / Model${arrow('name')}</th>
+            <th class="sortable" data-sort="role">Category / Role${arrow('role')}</th>
+            <th class="sortable" data-sort="accuracy">Accuracy${arrow('accuracy')}</th>
+            <th class="sortable" data-sort="precision">Precision${arrow('precision')}</th>
+            <th class="sortable" data-sort="recall">Recall${arrow('recall')}</th>
+            <th class="sortable" data-sort="macro_f1">Macro-F1${arrow('macro_f1')}</th>
+            <th class="sortable" data-sort="roc_auc">ROC-AUC${arrow('roc_auc')}</th>
+            <th class="sortable" data-sort="status">Status${arrow('status')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r) => `
+            <tr>
+              <td><strong>${escapeHtml(r.name)}</strong></td>
+              <td><span class="role-badge ${r.roleClass}">${escapeHtml(r.role)}</span></td>
+              <td>${formatMetric(r.metrics.accuracy)}</td>
+              <td>${formatMetric(r.metrics.precision)}</td>
+              <td>${formatMetric(r.metrics.recall)}</td>
+              <td>${formatMetric(r.metrics.macro_f1)}</td>
+              <td>${formatMetric(r.metrics.roc_auc)}</td>
+              <td><span class="pill pill-${r.status}">${r.status}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    $('leaderboardTableWrap').querySelectorAll('th.sortable').forEach((th) => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (lbSort.col === col) lbSort.asc = !lbSort.asc;
+        else { lbSort.col = col; lbSort.asc = numericCols.includes(col) ? false : true; }
+        renderLeaderboard();
+      });
+    });
+  }
+
+  $('lbTabs').querySelectorAll('.mode-pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeLbTab = btn.dataset.lb;
+      lbSort = { col: null, asc: true };
+      $('lbTabs').querySelectorAll('.mode-pill').forEach((b) => b.classList.toggle('active', b === btn));
+      renderLeaderboard();
+    });
+  });
+
+  /* ==========================================================================
+     DETECTION HISTORY VIEW
+     ========================================================================== */
+  function renderHistory() {
+    const q = $('histSearch').value.trim().toLowerCase();
+    const ds = $('histDataset').value;
+    const vd = $('histVerdict').value;
+    const sortDir = $('histSort').value;
+
+    let filtered = historyList.filter((item) => {
+      const matchQ = !q || item.analysis_id.toLowerCase().includes(q) || item.input.filename.toLowerCase().includes(q);
+      const matchDs = ds === 'all' || item.dataset === ds;
+      const matchVd = vd === 'all' || item.prediction.label === vd;
+      return matchQ && matchDs && matchVd;
+    });
+
+    filtered.sort((a, b) => {
+      const ta = new Date(a.metadata.timestamp).getTime();
+      const tb = new Date(b.metadata.timestamp).getTime();
+      return sortDir === 'newest' ? tb - ta : ta - tb;
+    });
+
+    if (filtered.length === 0) {
+      $('historyContent').innerHTML = `
+        <div class="empty-state">
+          <h3 class="disp" style="font-size:28px;margin-bottom:8px;">No Matching History Entries</h3>
+          <p style="font-size:13px;margin-bottom:16px;">Run an analysis in the workbench or adjust your search filters.</p>
+          <button class="btn sm" id="histGoAnalyze" type="button">Go to Analyze &rarr;</button>
+        </div>
+      `;
+      $('histGoAnalyze').addEventListener('click', () => navigateTo('analyze'));
+      return;
+    }
+
+    $('historyContent').innerHTML = `
+      <div class="table-wrap">
+        <table class="brut">
+          <thead>
+            <tr>
+              <th>Analysis ID</th>
+              <th>Date &amp; Time</th>
+              <th>Dataset</th>
+              <th>Input</th>
+              <th>Verdict</th>
+              <th>Confidence</th>
+              <th>Model</th>
+              <th>Duration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map((item) => `
+              <tr>
+                <td><strong>${item.analysis_id}</strong></td>
+                <td>${new Date(item.metadata.timestamp).toLocaleString()}</td>
+                <td>${item.dataset_name}</td>
+                <td>${escapeHtml(item.input.filename)}</td>
+                <td><span class="pill pill-${item.prediction.label}">${item.prediction.label}</span></td>
+                <td>${(item.prediction.confidence * 100).toFixed(1)}%</td>
+                <td style="font-size:11px;">${escapeHtml(item.model.model_name)}</td>
+                <td>${item.metadata.processing_time}s</td>
+                <td style="white-space:nowrap;">
+                  <button class="btn sm" data-reopen="${item.analysis_id}" type="button">Open</button>
+                  <button class="btn sm danger" data-del="${item.analysis_id}" type="button">&times;</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    $('historyContent').querySelectorAll('[data-reopen]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const found = historyList.find((x) => x.analysis_id === btn.dataset.reopen);
+        if (found) {
+          currentResult = found;
+          renderResultView(found);
+          navigateTo('result');
+        }
+      });
+    });
+
+    $('historyContent').querySelectorAll('[data-del]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        historyList = historyList.filter((x) => x.analysis_id !== btn.dataset.del);
+        saveHistory();
+        renderHistory();
+        showToast('Entry deleted');
+      });
+    });
+  }
+
+  ['histSearch', 'histDataset', 'histVerdict', 'histSort'].forEach((id) => {
+    $(id).addEventListener('input', renderHistory);
+    $(id).addEventListener('change', renderHistory);
+  });
+
+  $('clearHistoryBtn').addEventListener('click', () => {
+    if (!historyList.length) return;
+    historyList = [];
+    saveHistory();
+    renderHistory();
+    showToast('Session history cleared');
+  });
+
+  /* ==========================================================================
+     INITIALIZE DEFAULT PIPELINE & LEADERBOARD
+     ========================================================================== */
+  selectPipeline('fakeddit');
+  updateBenchmarkBanner();
+  renderLeaderboard();
+})();
+</script>
+</body>
+</html>

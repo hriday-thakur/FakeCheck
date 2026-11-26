@@ -1,0 +1,2 @@
+model,test_samples,accuracy,macro_f1,macro_roc_auc_ovr
+fusion,6000,0.7553333333333333,0.7565241037110365,0.905167875

@@ -1,0 +1,39 @@
+{
+  "dataset_id": "AdoCleanCode/Fakeddit",
+  "dataset_rows": 794660,
+  "columns": [
+    "id",
+    "text",
+    "6_way_label",
+    "label_name",
+    "hasImage",
+    "image_url",
+    "general_train",
+    "general_test",
+    "real_baseline",
+    "real_mild",
+    "real_moderate",
+    "real_severe"
+  ],
+  "six_way_label_counts": {
+    "0": 400104,
+    "1": 42222,
+    "2": 140251,
+    "3": 23801,
+    "4": 161731,
+    "5": 26551
+  },
+  "six_way_counts_with_hasImage": {
+    "0": 222001,
+    "1": 33424,
+    "2": 105955,
+    "3": 11783,
+    "4": 161731,
+    "5": 21562
+  },
+  "label_mapping": {
+    "0": "True / REAL (binary 1)",
+    "1-5": "Non-true / misinformation-related (binary 0)"
+  },
+  "important_limitation": "Fakeddit labels are misinformation-related post labels, not forensic deepfake image labels."
+}

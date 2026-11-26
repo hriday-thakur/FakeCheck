@@ -1,0 +1,39 @@
+{
+  "sample_id": "78oym6",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0269,
+  "per_model_probabilities_true": {
+    "M1_text": 0.061,
+    "M2_image": 0.0422,
+    "M3_clip": 0.0505,
+    "M4_vilt": 0.0687
+  },
+  "clip_image_text_similarity": 0.2733,
+  "top_evidence_words": [
+    {
+      "word": "to",
+      "importance": 0.0169
+    },
+    {
+      "word": "venice",
+      "importance": -0.0104
+    },
+    {
+      "word": "self",
+      "importance": 0.0088
+    },
+    {
+      "word": "titled",
+      "importance": -0.0054
+    },
+    {
+      "word": "am",
+      "importance": 0.0008
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/78oym6_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/78oym6_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.027, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.273, top influential words=['to', 'venice', 'self']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

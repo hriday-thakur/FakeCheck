@@ -1,0 +1,32 @@
+{
+  "dataset_id": "KoreaPeter/faceforensics-c23",
+  "dataset_split": "train",
+  "output_dir": "/content/drive/MyDrive/NLP_Deepfake_project/FFPP_PJ07_FINAL_corrected",
+  "max_per_class": 3000,
+  "max_frames_per_video": 12,
+  "batch_size": 8,
+  "epochs": 12,
+  "patience": 3,
+  "backbone_lr": 2e-05,
+  "classifier_lr": 0.0002,
+  "weight_decay": 0.0002,
+  "drop_rate": 0.25,
+  "drop_path_rate": 0.1,
+  "label_smoothing": 0.03,
+  "num_workers": 2,
+  "use_amp": true,
+  "seed": 42,
+  "temporal_frames": 8,
+  "temporal_hidden": 256,
+  "selective_target_accuracy": 0.85,
+  "minimum_accepted_validation": 25,
+  "jpeg_stress_qualities": [
+    40,
+    23
+  ],
+  "backbones": {
+    "Xception": "legacy_xception.tf_in1k",
+    "EfficientNet_B4": "tf_efficientnet_b4.ns_jft_in1k",
+    "ResNet50": "resnet50.a1_in1k"
+  }
+}

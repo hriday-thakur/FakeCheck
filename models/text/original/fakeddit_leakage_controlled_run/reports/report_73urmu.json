@@ -1,0 +1,39 @@
+{
+  "sample_id": "73urmu",
+  "prediction": "REAL",
+  "calibrated_probability_true": 0.9053,
+  "per_model_probabilities_true": {
+    "M1_text": 0.9027,
+    "M2_image": 0.9057,
+    "M3_clip": 0.9336,
+    "M4_vilt": 0.8943
+  },
+  "clip_image_text_similarity": 0.3495,
+  "top_evidence_words": [
+    {
+      "word": "anthem",
+      "importance": 0.0359
+    },
+    {
+      "word": "kneel",
+      "importance": 0.023
+    },
+    {
+      "word": "players",
+      "importance": 0.0186
+    },
+    {
+      "word": "protest",
+      "importance": 0.0153
+    },
+    {
+      "word": "call",
+      "importance": 0.014
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/73urmu_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/73urmu_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as REAL (calibrated p(True)=0.905, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.349, top influential words=['anthem', 'kneel', 'players']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

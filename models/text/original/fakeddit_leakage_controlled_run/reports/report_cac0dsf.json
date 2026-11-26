@@ -1,0 +1,31 @@
+{
+  "sample_id": "cac0dsf",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0354,
+  "per_model_probabilities_true": {
+    "M1_text": 0.052,
+    "M2_image": 0.7681,
+    "M3_clip": 0.0575,
+    "M4_vilt": 0.0525
+  },
+  "clip_image_text_similarity": 0.1974,
+  "top_evidence_words": [
+    {
+      "word": "say",
+      "importance": 0.0214
+    },
+    {
+      "word": "the",
+      "importance": -0.0064
+    },
+    {
+      "word": "jingle",
+      "importance": -0.0056
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/cac0dsf_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/cac0dsf_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.035, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.197, top influential words=['say', 'the', 'jingle']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

@@ -1,0 +1,35 @@
+{
+  "sample_id": "d1zwbad",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.025,
+  "per_model_probabilities_true": {
+    "M1_text": 0.0641,
+    "M2_image": 0.0552,
+    "M3_clip": 0.0679,
+    "M4_vilt": 0.0524
+  },
+  "clip_image_text_similarity": 0.2036,
+  "top_evidence_words": [
+    {
+      "word": "you",
+      "importance": 0.3116
+    },
+    {
+      "word": "say",
+      "importance": 0.0873
+    },
+    {
+      "word": "drawn",
+      "importance": -0.022
+    },
+    {
+      "word": "poorly",
+      "importance": -0.0122
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/d1zwbad_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/d1zwbad_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.025, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.204, top influential words=['you', 'say', 'drawn']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

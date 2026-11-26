@@ -1,0 +1,6 @@
+sanity_set,n,mean_p_true,pct_pred_FAKE,pct_pred_UNCERTAIN,pct_flagged_FAKE_or_UNCERTAIN,pct_binary_FAKE,mean_clip_cos_finetuned,mean_clip_cos_zeroshot,delta_clip_cos_vs_paired,three_way_prediction_shift_pct,note
+1. Clearly Genuine (True & confident),1444,0.9452448487281799,0.0,0.0,0.0,0.0,0.3142698407173157,0.30733272433280945,,,Fakeddit 6_way_label==0
+2. Clearly Manipulated (Imposter/Manipulated),1207,0.06496606767177582,94.69759734879868,4.473902236951118,99.17149958574979,97.68019884009942,0.22009631991386414,0.24288037419319153,,,"Fakeddit 6_way_label in {3, 4} (misinformation post label, not forensic)"
+3a. Paired Baseline (for mismatch comparison),500,0.4189414978027344,52.6,15.0,67.60000000000001,58.8,0.2675156891345978,0.27912360429763794,,,Original aligned test subset
+3b. Deliberately Mismatched (shuffled images),500,0.23819808661937714,68.4,23.799999999999997,92.2,80.60000000000001,0.13045015931129456,0.1733035296201706,-0.13706551492214203,39.6,"NO Fakeddit label: behaviour test only, NOT accuracy"
+3c. Deliberately Mismatched (shuffled texts),500,0.23207369446754456,65.60000000000001,27.400000000000002,93.0,84.2,0.13118627667427063,0.1734488606452942,-0.13632941246032715,47.0,"NO Fakeddit label: behaviour test only, NOT accuracy"

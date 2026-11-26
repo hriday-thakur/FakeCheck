@@ -1,0 +1,2 @@
+model,test_samples,accuracy,macro_f1,macro_roc_auc_ovr
+bridgetower,6000,0.7461666666666666,0.745475253640068,0.8952166666666667

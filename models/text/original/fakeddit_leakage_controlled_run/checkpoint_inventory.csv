@@ -1,0 +1,10 @@
+component,checkpoint,exists,size_mb
+ffpp,Not configured,False,
+fakeddit/M1_text,/content/gdrive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/checkpoints/M1_text_best.pt,True,476.32
+fakeddit/M2_image,/content/gdrive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/checkpoints/M2_image_best.pt,True,106.95
+fakeddit/M3_clip,/content/gdrive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/checkpoints/M3_clip_best.pt,True,572.92
+fakeddit/M4_vilt,/content/gdrive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/checkpoints/M4_vilt_best.pt,True,426.54
+snlive/BLIP,/content/gdrive/MyDrive/SNLI_VE_COMPLETE_PROJECT/blip-best.pt,True,145.02
+snlive/ViLT,/content/gdrive/MyDrive/SNLI_VE_COMPLETE_PROJECT/vilt-best.pt,True,111.2
+snlive/BridgeTower,/content/gdrive/MyDrive/SNLI_VE_COMPLETE_PROJECT/bridgetower-best.pt,True,150.28
+snlive/Fusion,/content/gdrive/MyDrive/SNLI_VE_COMPLETE_PROJECT/fusion-best.pt,True,1.77

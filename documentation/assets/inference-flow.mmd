@@ -1,0 +1,16 @@
+sequenceDiagram
+    autonumber
+    participant B as Browser (index.html)
+    participant A as FastAPI (main.py)
+    participant V as Validator & Locks
+    participant P as Preprocessing
+    participant M as Model Singleton
+
+    B->>A: POST /api/predict/{pipeline} (FormData)
+    A->>V: Validate model_id, mode, MIME type, max_mb (400/413/415/422)
+    V->>M: Acquire per-model threading.Lock() if uninitialized
+    M-->>V: Return cached singleton predictor
+    V->>P: Tokenize text / resize RGB image / sample <=8 MP4 frames
+    P->>M: Forward pass (torch.no_grad(), CPU)
+    M-->>A: Logits -> Softmax probabilities + prediction + confidence
+    A-->>B: 200 OK JSON (adaptApiResult)

@@ -1,0 +1,39 @@
+{
+  "sample_id": "7eqxio",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0676,
+  "per_model_probabilities_true": {
+    "M1_text": 0.2771,
+    "M2_image": 0.0692,
+    "M3_clip": 0.2633,
+    "M4_vilt": 0.1105
+  },
+  "clip_image_text_similarity": 0.1947,
+  "top_evidence_words": [
+    {
+      "word": "the",
+      "importance": 0.2084
+    },
+    {
+      "word": "badass",
+      "importance": 0.1503
+    },
+    {
+      "word": "we",
+      "importance": 0.1052
+    },
+    {
+      "word": "winner",
+      "importance": -0.1045
+    },
+    {
+      "word": "most",
+      "importance": -0.0955
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/7eqxio_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/7eqxio_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.068, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.195, top influential words=['the', 'badass', 'we']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

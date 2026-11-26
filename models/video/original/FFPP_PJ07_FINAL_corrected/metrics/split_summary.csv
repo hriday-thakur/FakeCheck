@@ -1,0 +1,4 @@
+split,samples,real,fake,videos,source_groups
+train,4191,2094,2097,1946,555
+validation,887,444,443,417,119
+test,922,462,460,418,120

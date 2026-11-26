@@ -1,0 +1,11 @@
+id,true_6way,prediction,calibrated_p_true,clip_similarity
+213rlt,Misleading content,FAKE (misinformation-related),0.0304,0.3062
+cac0dsf,Manipulated content,FAKE (misinformation-related),0.0354,0.1974
+7eqxio,True,FAKE (misinformation-related),0.0676,0.1947
+cn865kj,Manipulated content,FAKE (misinformation-related),0.0381,0.1869
+66iuvr,True,REAL,0.8912,0.347
+73urmu,True,REAL,0.9053,0.3495
+cx8vgee,Manipulated content,FAKE (misinformation-related),0.0279,0.1913
+d1zwbad,Manipulated content,FAKE (misinformation-related),0.025,0.2036
+dpj8r65,Manipulated content,FAKE (misinformation-related),0.0213,0.2188
+78oym6,Satire,FAKE (misinformation-related),0.0269,0.2733

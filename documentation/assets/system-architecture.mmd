@@ -1,0 +1,15 @@
+flowchart LR
+    User["Browser (frontend/index.html)"] -->|HTTPS| CF["Cloudflare Quick Tunnel (ephemeral)"]
+    CF -->|HTTP 127.0.0.1:8000| API["FastAPI Backend (backend/app/main.py)"]
+
+    API -->|"GET /"| FE["Static UI (FileResponse)"]
+    API -->|"GET /api/health"| H["Dynamic Runtime Readiness"]
+    API -->|"GET /api/benchmark"| BM["Verified CSV Benchmarks"]
+
+    API -->|"POST /api/predict/fakeddit"| FK["FakedditClipPredictor (fk_m3_clip)"]
+    API -->|"POST /api/predict/snlive"| SN["SnliBlipPredictor (snli_blip)"]
+    API -->|"POST /api/predict/faceforensics"| FF["FaceForensicsPredictor (ff_xception_bilstm)"]
+
+    FK --> FK_C["M3_clip_best.pt + clip_processor/"]
+    SN --> SN_C["blip-best.pt + HF BLIP Cache"]
+    FF --> FF_C["Xception_best.pt + xception_bilstm_video_best.pt"]

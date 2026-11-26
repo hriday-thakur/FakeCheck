@@ -1,0 +1,11 @@
+{
+  "final_fusion": "F4 Gated Feature Fusion",
+  "target_decided_accuracy": 0.95,
+  "t_lo": 0.2,
+  "t_hi": 0.85,
+  "val_coverage": 0.8571107616266007,
+  "val_decided_accuracy": 0.9504587155963303,
+  "test_coverage": 0.8488659330788233,
+  "test_decided_accuracy": 0.9608465608465608,
+  "test_area_under_coverage_accuracy": 0.9838753444881536
+}

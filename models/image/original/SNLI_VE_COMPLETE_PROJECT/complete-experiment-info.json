@@ -1,0 +1,34 @@
+{
+    "MODELS": {
+        "blip": "Salesforce/blip-itm-base-coco",
+        "vilt": "dandelin/vilt-b32-mlm",
+        "bridgetower": "BridgeTower/bridgetower-base"
+    },
+    "SEED": 42,
+    "EPOCHS": 4,
+    "LABELS": [
+        "entailment",
+        "neutral",
+        "contradiction"
+    ],
+    "N": 30000,
+    "winner": "blip",
+    "versions": {
+        "blip": "bed8ad38cb2d04a5a4bdf2d071b3c3c0a4aa724c",
+        "vilt": "9507e9c3da12076e10f272e942569dc5190edc1c",
+        "bridgetower": "fd4811362b878484486d705eb13d9797361e6788",
+        "dataset": "662ae119b528a30446472560bf3b1af541f0b292"
+    },
+    "environment": {
+        "python": "3.13.16",
+        "pytorch": "2.11.0+cu130",
+        "numpy": "2.1.3",
+        "pandas": "2.3.3",
+        "cuda": "13.0",
+        "gpu_count": 2,
+        "gpu_names": [
+            "Tesla T4",
+            "Tesla T4"
+        ]
+    }
+}

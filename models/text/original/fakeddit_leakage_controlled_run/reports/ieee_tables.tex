@@ -1,0 +1,61 @@
+\begin{table}[t]
+\centering
+\caption{Held-out test comparison of single-modality and multimodal models on Fakeddit.}
+\label{tab:e1_results}
+\begin{tabular}{lllllll}
+\toprule
+model & accuracy & macro\_precision & macro\_recall & macro\_f1 & roc\_auc & pr\_auc \\
+\midrule
+M1\_text (DeBERTa/RoBERTa) & 0.8491 & 0.8445 & 0.8497 & 0.8464 & 0.9231 & 0.8978 \\
+M2\_image (ConvNeXt-Tiny) & 0.7781 & 0.7813 & 0.7883 & 0.7773 & 0.8653 & 0.7970 \\
+M3\_clip (CLIP Dual-Encoder) & 0.9007 & 0.8967 & 0.9031 & 0.8991 & 0.9621 & 0.9410 \\
+M4\_vilt (Cross-Modal) & 0.8495 & 0.8469 & 0.8553 & 0.8480 & 0.9301 & 0.8998 \\
+Final Fusion (F4 Gated Feature Fusion) & 0.9129 & 0.9097 & 0.9124 & 0.9109 & 0.9728 & 0.9623 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Validation CV and held-out test comparison across fusion strategies.}
+\label{tab:e2_fusion}
+\begin{tabular}{llllll}
+\toprule
+method & val\_cv\_macro\_f1 & test\_accuracy & test\_macro\_f1 & test\_roc\_auc & test\_log\_loss \\
+\midrule
+M1\_text (single) & 0.8344 & 0.8491 & 0.8464 & 0.9231 & 0.3579 \\
+M2\_image (single) & 0.7745 & 0.7781 & 0.7773 & 0.8653 & 0.4675 \\
+M3\_clip (single) & 0.8968 & 0.9007 & 0.8991 & 0.9621 & 0.2709 \\
+M4\_vilt (single) & 0.8366 & 0.8495 & 0.8480 & 0.9301 & 0.3532 \\
+Concat Baseline & 0.8875 & 0.8900 & 0.8873 & 0.9557 & 0.2938 \\
+F1 Simple Average & 0.8897 & 0.9028 & 0.9014 & 0.9656 & 0.2898 \\
+F2 Weighted Average & 0.8970 & 0.9025 & 0.9009 & 0.9692 & 0.2447 \\
+F3 Stacking (LogReg) & 0.9042 & 0.9124 & 0.9104 & 0.9718 & 0.2145 \\
+F4 Gated Feature Fusion & 0.9056 & 0.9129 & 0.9109 & 0.9728 & 0.2244 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Modality, leave-one-model-out, and missing-modality ablation results.}
+\label{tab:e4_ablation}
+\begin{tabular}{llll}
+\toprule
+experiment & test\_accuracy & test\_macro\_f1 & test\_roc\_auc \\
+\midrule
+Leave-one-out (drop M1\_text) & 0.9106 & 0.9086 & 0.9685 \\
+Leave-one-out (drop M2\_image) & 0.9073 & 0.9051 & 0.9697 \\
+Leave-one-out (drop M3\_clip) & 0.8897 & 0.8873 & 0.9564 \\
+Leave-one-out (drop M4\_vilt) & 0.9115 & 0.9095 & 0.9715 \\
+Modality: Text-derived only (M1) & 0.8491 & 0.8446 & 0.9231 \\
+Modality: Image-derived only (M2) & 0.7860 & 0.7831 & 0.8653 \\
+Modality: Multimodal-only (M3+M4) & 0.9073 & 0.9052 & 0.9668 \\
+Modality: All models (M1+M2+M3+M4) & 0.9124 & 0.9104 & 0.9718 \\
+Missing Image -> Full Stacker (masked image) & 0.7319 & 0.6772 & 0.9165 \\
+Missing Text -> Full Stacker (empty text) & 0.5823 & 0.3739 & 0.8710 \\
+Missing Image -> Subset Stacker (M1 text only) & 0.8491 & 0.8446 & 0.9231 \\
+Missing Text -> Subset Stacker (M2 image only) & 0.7860 & 0.7831 & 0.8653 \\
+\bottomrule
+\end{tabular}
+\end{table}

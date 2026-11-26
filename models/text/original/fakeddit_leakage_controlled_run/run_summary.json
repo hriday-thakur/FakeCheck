@@ -1,0 +1,85 @@
+{
+  "dataset_id": "AdoCleanCode/Fakeddit",
+  "task_scope": "Fakeddit misinformation-related post classification (NOT forensic deepfake detection)",
+  "fast_debug": false,
+  "seed": 42,
+  "sample_counts": {
+    "candidate_rows": 54000,
+    "dropped_download_or_invalid": 3821,
+    "usable_unique_pairs_before_phash": 30000,
+    "dropped_near_duplicates_val": 49,
+    "dropped_near_duplicates_test": 47,
+    "train_size": 21000,
+    "val_size": 4451,
+    "test_size": 4453
+  },
+  "class_counts_binary": {
+    "train": {
+      "0": 12234,
+      "1": 8766
+    },
+    "val": {
+      "0": 2584,
+      "1": 1867
+    },
+    "test": {
+      "0": 2581,
+      "1": 1872
+    }
+  },
+  "class_counts_6way": {
+    "train": {
+      "0": 8766,
+      "1": 1352,
+      "2": 4081,
+      "3": 472,
+      "4": 5422,
+      "5": 907
+    },
+    "val": {
+      "0": 1867,
+      "1": 313,
+      "2": 865,
+      "3": 89,
+      "4": 1108,
+      "5": 209
+    },
+    "test": {
+      "0": 1872,
+      "1": 293,
+      "2": 877,
+      "3": 78,
+      "4": 1129,
+      "5": 204
+    }
+  },
+  "chosen_fusion": "F4 Gated Feature Fusion",
+  "calibration_temperatures": {
+    "M1_text": 1.1196527802801868,
+    "M2_image": 0.9864298896567141,
+    "M3_clip": 1.2760057303751002,
+    "M4_vilt": 1.1055736541671064,
+    "F4 Gated Feature Fusion": 0.9457072192113133
+  },
+  "three_way_thresholds": {
+    "t_lo": 0.2,
+    "t_hi": 0.85,
+    "target_decided_accuracy": 0.95
+  },
+  "library_versions": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.24.1",
+    "timm": "1.0.31",
+    "sklearn": "1.9.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "scipy": "1.18.1",
+    "captum": "0.9.0",
+    "imagehash": "4.3.2",
+    "gradio": "6.32.0"
+  },
+  "device": "cuda",
+  "gpu_name": "Tesla T4",
+  "run_directory": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run"
+}

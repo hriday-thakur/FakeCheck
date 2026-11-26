@@ -1,0 +1,2 @@
+model,test_samples,accuracy,macro_f1,macro_roc_auc_ovr
+vilt,6000,0.6963333333333334,0.6973116500985291,0.8561722916666666

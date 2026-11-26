@@ -1,0 +1,23 @@
+{
+  "sample_id": "cx8vgee",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0279,
+  "per_model_probabilities_true": {
+    "M1_text": 0.0675,
+    "M2_image": 0.2444,
+    "M3_clip": 0.1167,
+    "M4_vilt": 0.0641
+  },
+  "clip_image_text_similarity": 0.1913,
+  "top_evidence_words": [
+    {
+      "word": "bravo",
+      "importance": 0.034
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/cx8vgee_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/cx8vgee_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.028, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.191, top influential words=['bravo']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

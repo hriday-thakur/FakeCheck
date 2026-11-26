@@ -1,0 +1,4 @@
+split,0
+test,6000
+train,30000
+validation,6000

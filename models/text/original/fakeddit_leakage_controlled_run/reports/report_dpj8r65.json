@@ -1,0 +1,27 @@
+{
+  "sample_id": "dpj8r65",
+  "prediction": "FAKE (misinformation-related)",
+  "calibrated_probability_true": 0.0213,
+  "per_model_probabilities_true": {
+    "M1_text": 0.0636,
+    "M2_image": 0.0445,
+    "M3_clip": 0.0653,
+    "M4_vilt": 0.0569
+  },
+  "clip_image_text_similarity": 0.2188,
+  "top_evidence_words": [
+    {
+      "word": "ooops",
+      "importance": 0.0242
+    },
+    {
+      "word": "muggles",
+      "importance": -0.0116
+    }
+  ],
+  "heatmap_file_paths": {
+    "convnext_gradcam": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/dpj8r65_convnext_gradcam.png",
+    "clip_patch_sim": "/content/drive/MyDrive/NLP_Deepfake_project/fakeddit_leakage_controlled_run/explanations/dpj8r65_clip_patch_sim.png"
+  },
+  "explanation_sentence": "Classified as FAKE (misinformation-related) (calibrated p(True)=0.021, thresholds [0.20, 0.85]) using F4 Gated Feature Fusion; CLIP image-text similarity=0.219, top influential words=['ooops', 'muggles']. Note: this reflects Fakeddit misinformation-related post patterns, not forensic image manipulation."
+}

@@ -1,0 +1,8 @@
+{
+  "n10_A_right_B_wrong": 99,
+  "n01_A_wrong_B_right": 45,
+  "discordant": 144,
+  "p_value": 7.952538678129078e-06,
+  "model_A_fusion": "Final Fusion (F4 Gated Feature Fusion)",
+  "model_B_best_single": "M3_clip (CLIP Dual-Encoder)"
+}

@@ -1,0 +1,2 @@
+model,test_samples,accuracy,macro_f1,macro_roc_auc_ovr
+blip,6000,0.7575,0.7561505342019723,0.9028392083333334
