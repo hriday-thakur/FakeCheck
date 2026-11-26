@@ -1712,8 +1712,7 @@ footer {
           Drop in an image, video, or claim. Three independent pipelines check the text, face, and caption match—then prove why.
         </p>
         <div class="hero-ctas">
-          <button class="btn" type="button" data-go="analyze">Analyze Media &rarr;</button>
-          <a class="btn alt" href="#home-pipelines">Explore Pipelines</a>
+          <a class="btn" id="explorePipelinesBtn" href="#home-pipelines">Explore Pipelines &darr;</a>
         </div>
       </div>
 
@@ -1756,39 +1755,39 @@ footer {
     </div>
   </div>
 
-  <!-- Three Independent Pipelines -->
+  <!-- Choose Your Analysis (Direct Model Selection) -->
   <section id="home-pipelines" class="section-band">
     <div class="wrap">
-      <span class="tag acid">Three Independent ML Pipelines</span>
-      <h2 class="disp sec-title rv">Three tasks.<br>Three kinds of proof.</h2>
+      <span class="tag acid">Direct Model Selection</span>
+      <h2 class="disp sec-title rv">Choose Your Analysis</h2>
       <div class="grid-3">
-        <article class="card hoverable task-card rv">
+        <article class="card hoverable task-card rv" role="button" tabindex="0" data-launch-pipe="fakeddit" style="cursor:pointer;">
           <div class="task-num">T1</div>
-          <h3>Fakeddit Misinformation</h3>
-          <p>Image + Text misinformation detection using independent text encoders, visual encoders, and cross-modal fusion.</p>
+          <h3>Fakeddit &mdash; Misinformation Detection</h3>
+          <p>Analyze text and images to classify potentially misleading social media posts using the active Fakeddit pipeline.</p>
           <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <span class="tag" style="margin:0;">JPG/PNG + TEXT</span>
-            <button class="btn sm" type="button" data-launch-pipe="fakeddit">Launch T1 &rarr;</button>
+            <button class="btn sm" type="button" data-launch-pipe="fakeddit">Launch Fakeddit &rarr;</button>
           </div>
         </article>
 
-        <article class="card hoverable task-card rv">
+        <article class="card hoverable task-card rv" role="button" tabindex="0" data-launch-pipe="snlive" style="cursor:pointer;">
           <div class="task-num">T2</div>
-          <h3>FaceForensics++ Video</h3>
-          <p>Frame-level and temporal facial manipulation forensics covering Original, Deepfakes, Face2Face, FaceSwap, and NeuralTextures.</p>
-          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-            <span class="tag" style="margin:0;">MP4 VIDEO</span>
-            <button class="btn sm" type="button" data-launch-pipe="faceforensics">Launch T2 &rarr;</button>
-          </div>
-        </article>
-
-        <article class="card hoverable task-card rv">
-          <div class="task-num">T3</div>
-          <h3>SNLI-VE + Custom Mismatch</h3>
-          <p>Visual entailment &amp; cross-modal semantic consistency verification separating Entailment, Neutral, Contradiction, and custom mismatch classes.</p>
+          <h3>SNLI-VE &mdash; Image-Text Verification</h3>
+          <p>Analyze an image and accompanying text to classify entailment, neutral, and contradiction relationships.</p>
           <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <span class="tag" style="margin:0;">IMAGE + HYPOTHESIS</span>
-            <button class="btn sm" type="button" data-launch-pipe="snlive">Launch T3 &rarr;</button>
+            <button class="btn sm" type="button" data-launch-pipe="snlive">Launch SNLI-VE &rarr;</button>
+          </div>
+        </article>
+
+        <article class="card hoverable task-card rv" role="button" tabindex="0" data-launch-pipe="faceforensics" style="cursor:pointer;">
+          <div class="task-num">T3</div>
+          <h3>FaceForensics++ &mdash; Deepfake Detection</h3>
+          <p>Accept MP4 video uploads for temporal facial manipulation detection across sampled video frames.</p>
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span class="tag" style="margin:0;">MP4 VIDEO</span>
+            <button class="btn sm" type="button" data-launch-pipe="faceforensics">Launch FaceForensics++ &rarr;</button>
           </div>
         </article>
       </div>
@@ -2242,7 +2241,8 @@ footer {
       sampleBtnText: 'Load Sample Post',
       legendHtml: '<strong>FAKEDDIT PIPELINE:</strong> Binary misinformation classifier with validation-calibrated temperature scaling and Shannon entropy abstention. Implemented fusion heads: <code>Concatenation Fusion</code> and <code>Weighted Late Fusion</code> (Cross-Modal Attention was not implemented in final experiments).',
       models: [
-        { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder) [Primary]', textEnc: 'CLIP Text (ViT-B/16)', visEnc: 'CLIP Vision (ViT-B/16)', fusion: '2049->256 Interaction Projection', modes: ['multimodal'], xai: ['text', 'image'], defaultTemp: 1.276, defaultConf: 0.65, defaultEnt: 0.72 }
+        { id: 'fk_f4_gated', name: 'F4 Gated Feature Fusion (M1+M2+M3+M4) [Primary]', textEnc: 'RoBERTa + CLIP + ViLT', visEnc: 'ConvNeXt-Tiny + CLIP + ViLT', fusion: 'Gated Feature Fusion (128-d)', modes: ['multimodal'], xai: ['text', 'image'], defaultTemp: 0.946, defaultConf: 0.65, defaultEnt: 0.72 },
+        { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder) [Alternative]', textEnc: 'CLIP Text (ViT-B/16)', visEnc: 'CLIP Vision (ViT-B/16)', fusion: '2049->256 Interaction Projection', modes: ['multimodal'], xai: ['text', 'image'], defaultTemp: 1.276, defaultConf: 0.65, defaultEnt: 0.72 }
       ]
     },
     faceforensics: {
@@ -2290,7 +2290,8 @@ footer {
 
   const LEADERBOARD_DATA = {
     fakeddit: [
-      { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder)', role: 'Primary Multimodal', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'fk_f4_gated', name: 'F4 Gated Feature Fusion', role: 'Primary Gated Fusion', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
+      { id: 'fk_m3_clip', name: 'M3_clip (CLIP ViT-B/16 Dual-Encoder)', role: 'Alternative Multimodal', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
       { id: 'fk_m4_vilt', name: 'M4_vilt (ViLT)', role: 'Secondary Multimodal', roleClass: 'role-fusion', metrics: createEmptyMetrics(), status: 'Unavailable' },
       { id: 'fk_m1_text', name: 'M1_text (RoBERTa-base)', role: 'Secondary Text Encoder', roleClass: 'role-text', metrics: createEmptyMetrics(), status: 'Unavailable' },
       { id: 'fk_m2_image', name: 'M2_image (ConvNeXt-Tiny)', role: 'Secondary Visual Encoder', roleClass: 'role-vis', metrics: createEmptyMetrics(), status: 'Unavailable' }
@@ -2571,10 +2572,29 @@ footer {
     btn.addEventListener('click', () => navigateTo(btn.dataset.go));
   });
 
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
+  const exploreBtn = $('explorePipelinesBtn');
+  if (exploreBtn) {
+    exploreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      $('home-pipelines').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
   document.querySelectorAll('[data-launch-pipe]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       selectPipeline(btn.dataset.launchPipe);
       navigateTo('analyze');
+    });
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectPipeline(btn.dataset.launchPipe);
+        navigateTo('analyze');
+      }
     });
   });
 

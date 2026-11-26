@@ -1,0 +1,31 @@
+{
+  "model_name": "F4 Gated Feature Fusion",
+  "model_keys": [
+    "M1_text",
+    "M2_image",
+    "M3_clip",
+    "M4_vilt"
+  ],
+  "embed_dims": [
+    256,
+    256,
+    256,
+    256
+  ],
+  "proj_dim": 128,
+  "mod_drop_p": 0.2,
+  "refit_epochs": 4,
+  "cv_best_epochs": [
+    5,
+    3,
+    7,
+    4,
+    3
+  ],
+  "seed": 42,
+  "training_source": "P07_Fakeddit_Leakage_Controlled_Multimodal_Training_CSET346",
+  "training_protocol": "5-fold validation CV; final refit on all validation embeddings; held-out test embeddings used only for sanity check",
+  "checkpoint_file": "F4_Gated_Feature_Fusion_best.pt",
+  "checkpoint_size_mb": 0.555,
+  "saved_at_local_runtime": "2026-11-26 17:17:34"
+}

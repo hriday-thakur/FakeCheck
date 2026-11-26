@@ -19,6 +19,7 @@ def _load_fakeddit_benchmarks(models_dir: Path) -> list[dict]:
     if not path.is_file():
         return []
     id_map = {
+        "Final Fusion": "fk_f4_gated",
         "M3_clip": "fk_m3_clip",
         "M1_text": "fk_m1_text",
         "M2_image": "fk_m2_image",

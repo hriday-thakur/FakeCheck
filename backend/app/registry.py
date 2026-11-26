@@ -32,11 +32,26 @@ class ModelSpec:
 
 MODEL_REGISTRY: dict[str, ModelSpec] = {
     # Fakeddit
+    "fk_f4_gated": ModelSpec(
+        model_id="fk_f4_gated",
+        pipeline="fakeddit",
+        name="F4 Gated Feature Fusion (M1+M2+M3+M4)",
+        is_primary=True,
+        checkpoint_rel_paths=(
+            "text/original/fakeddit_leakage_controlled_run/checkpoints/M1_text_best.pt",
+            "text/original/fakeddit_leakage_controlled_run/checkpoints/M2_image_best.pt",
+            "text/original/fakeddit_leakage_controlled_run/checkpoints/M3_clip_best.pt",
+            "text/original/fakeddit_leakage_controlled_run/checkpoints/M4_vilt_best.pt",
+            "text/original/fakeddit_leakage_controlled_run/checkpoints/F4_Gated_Feature_Fusion_best.pt",
+        ),
+        modes=("multimodal",),
+        inference_ready=True,
+    ),
     "fk_m3_clip": ModelSpec(
         model_id="fk_m3_clip",
         pipeline="fakeddit",
         name="M3_clip (CLIP Dual-Encoder)",
-        is_primary=True,
+        is_primary=False,
         checkpoint_rel_paths=("text/original/fakeddit_leakage_controlled_run/checkpoints/M3_clip_best.pt",),
         modes=("multimodal",),
         inference_ready=True,
@@ -131,7 +146,7 @@ MODEL_REGISTRY: dict[str, ModelSpec] = {
 }
 
 PRIMARY_MODEL_BY_PIPELINE = {
-    "fakeddit": "fk_m3_clip",
+    "fakeddit": "fk_f4_gated",
     "snlive": "snli_blip",
     "faceforensics": "ff_xception_bilstm",
 }

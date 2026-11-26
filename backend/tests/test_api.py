@@ -28,9 +28,9 @@ def test_health_endpoint():
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "ok"
-    assert len(data["models"]) == 11
+    assert len(data["models"]) == 12
     for m in data["models"]:
-        if m["model_id"] in {"fk_m3_clip", "snli_blip", "ff_xception_bilstm"}:
+        if m["model_id"] in {"fk_f4_gated", "fk_m3_clip", "snli_blip", "ff_xception_bilstm"}:
             assert m["inference_ready"] is True
         else:
             assert m["inference_ready"] is False
@@ -93,6 +93,44 @@ def test_fakeddit_clip_real_prediction():
     assert abs(data["scores"]["REAL"] + data["scores"]["FAKE"] - 1.0) < 1e-5
     assert 0.0 <= data["confidence"] <= 1.0
     assert "model_name" in data and "architecture" in data and "processing_time" in data
+
+
+def test_fakeddit_f4_default_and_real_prediction():
+    from io import BytesIO
+    from PIL import Image
+    from app.main import get_fakeddit_f4_predictor
+
+    buf = BytesIO()
+    Image.new("RGB", (64, 64), color=(100, 150, 200)).save(buf, format="JPEG")
+    img_bytes = buf.getvalue()
+
+    # Omit model_id -> defaults to fk_f4_gated
+    r1 = _run(
+        _request(
+            "POST",
+            "/api/predict/fakeddit",
+            data={"mode": "multimodal", "text": "Breaking news: local event confirmed"},
+            files={"file": ("test.jpg", img_bytes, "image/jpeg")},
+        )
+    )
+    assert r1.status_code == 200
+    d1 = r1.json()
+    assert "F4 Gated Feature Fusion" in d1["model_name"]
+    assert d1["prediction"] in {"REAL", "FAKE"}
+    assert abs(d1["scores"]["REAL"] + d1["scores"]["FAKE"] - 1.0) < 1e-5
+    assert 0.0 <= d1["confidence"] <= 1.0
+
+    p1 = get_fakeddit_f4_predictor()
+    r2 = _run(
+        _request(
+            "POST",
+            "/api/predict/fakeddit",
+            data={"model_id": "fk_f4_gated", "mode": "multimodal", "text": "Breaking news: local event confirmed"},
+            files={"file": ("test.jpg", img_bytes, "image/jpeg")},
+        )
+    )
+    assert r2.status_code == 200
+    assert get_fakeddit_f4_predictor() is p1
 
 
 def test_snlive_validation_and_503():

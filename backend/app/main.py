@@ -11,6 +11,7 @@ from PIL import Image, UnidentifiedImageError
 from app.benchmarks import get_benchmarks
 from app.config import PROJECT_ROOT, settings
 from app.inference.fakeddit_clip import CALIBRATION_TEMP, FakedditClipPredictor
+from app.inference.fakeddit_f4 import F4_CALIBRATION_TEMP, FakedditF4Predictor
 from app.inference.faceforensics_bilstm import PREPROCESSING_WARNING, FaceForensicsPredictor
 from app.inference.snlive_blip import SnliBlipPredictor
 from app.registry import MODEL_REGISTRY, PRIMARY_MODEL_BY_PIPELINE
@@ -30,10 +31,12 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/jpg", "image/png"}
 ALLOWED_VIDEO_TYPES = {"video/mp4"}
 
 _fakeddit_clip_predictor: FakedditClipPredictor | None = None
+_fakeddit_f4_predictor: FakedditF4Predictor | None = None
 _snli_blip_predictor: SnliBlipPredictor | None = None
 _faceforensics_predictor: FaceForensicsPredictor | None = None
 
 _fakeddit_clip_lock = threading.Lock()
+_fakeddit_f4_lock = threading.Lock()
 _snli_blip_lock = threading.Lock()
 _faceforensics_lock = threading.Lock()
 _model_runtime_states: dict[str, str] = {}
@@ -56,6 +59,22 @@ def get_fakeddit_clip_predictor() -> FakedditClipPredictor:
                 ckpt_path = settings.models_dir / spec.checkpoint_rel_paths[0]
                 _fakeddit_clip_predictor = FakedditClipPredictor(checkpoint_path=ckpt_path)
     return _fakeddit_clip_predictor
+
+
+def get_fakeddit_f4_predictor() -> FakedditF4Predictor:
+    global _fakeddit_f4_predictor
+    if _fakeddit_f4_predictor is None:
+        with _fakeddit_f4_lock:
+            if _fakeddit_f4_predictor is None:
+                spec = MODEL_REGISTRY["fk_f4_gated"]
+                _fakeddit_f4_predictor = FakedditF4Predictor(
+                    m1_ckpt=settings.models_dir / spec.checkpoint_rel_paths[0],
+                    m2_ckpt=settings.models_dir / spec.checkpoint_rel_paths[1],
+                    m3_ckpt=settings.models_dir / spec.checkpoint_rel_paths[2],
+                    m4_ckpt=settings.models_dir / spec.checkpoint_rel_paths[3],
+                    f4_ckpt=settings.models_dir / spec.checkpoint_rel_paths[4],
+                )
+    return _fakeddit_f4_predictor
 
 
 def get_snli_blip_predictor() -> SnliBlipPredictor:
@@ -155,9 +174,9 @@ async def predict_fakeddit(
     if mode in {"multimodal", "image-only"}:
         await _validate_upload(file, ALLOWED_IMAGE_TYPES, max_mb=settings.max_image_mb)
 
-    if spec.model_id == "fk_m3_clip" and spec.inference_ready:
+    if spec.model_id in {"fk_f4_gated", "fk_m3_clip"} and spec.inference_ready:
         if mode != "multimodal" or file is None or not (text and text.strip()):
-            raise HTTPException(status_code=422, detail="fk_m3_clip requires both 'file' and 'text' in multimodal mode.")
+            raise HTTPException(status_code=422, detail=f"{spec.model_id} requires both 'file' and 'text' in multimodal mode.")
         await file.seek(0)
         raw_bytes = await file.read()
         try:
@@ -165,13 +184,14 @@ async def predict_fakeddit(
         except (UnidentifiedImageError, OSError) as exc:
             raise HTTPException(status_code=422, detail=f"Invalid image file: {exc}") from exc
 
+        default_temp = F4_CALIBRATION_TEMP if spec.model_id == "fk_f4_gated" else CALIBRATION_TEMP
         try:
             temp = float(temperature)
         except ValueError:
-            temp = CALIBRATION_TEMP
+            temp = default_temp
 
         try:
-            predictor = get_fakeddit_clip_predictor()
+            predictor = get_fakeddit_f4_predictor() if spec.model_id == "fk_f4_gated" else get_fakeddit_clip_predictor()
             result = predictor.predict(image=image, text=text.strip(), temperature=temp)
         except FileNotFoundError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
